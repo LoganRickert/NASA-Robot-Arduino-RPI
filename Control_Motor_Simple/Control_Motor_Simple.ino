@@ -106,7 +106,9 @@ void updateRate(int &rate, int offset, int modifier) {
 
     rate += ((delta + offset) * modifier);
   
-    Serial.print("Changing speed to: ");
+    Serial.print("Changing speed by ");
+    Serial.print(((delta + offset) * modifier));
+    Serial.print(" to ");
     Serial.println(rate);
   }
 }
@@ -125,7 +127,7 @@ int getNumberFromSerial() {
  
  *  @number - The number to be clamped and returned.
  */
-int clamp(int number, int high, int low) {
+int clamp(int number, int low, int high) {
   if (number > high) number = high;
   if (number < low) number = low;
   return number;

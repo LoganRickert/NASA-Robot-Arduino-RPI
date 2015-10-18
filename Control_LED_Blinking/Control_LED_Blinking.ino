@@ -4,7 +4,16 @@
  *  Controls how many times per second an LED flashes. Flashes
  *  one time a second by default. The LED is controlled by serial
  *  in and reports back via serial out when the blinkRate is
- *  updated.
+ *  updated. The value of light must blink at least 1 time a second.
+ *  
+ *  Serial Encoding:
+ *  9 - increase 25
+ *  8 - increase 20
+ *  ...
+ *  4 - increase 0
+ *  3 - increase -5
+ *  ...
+ *  0 - increase -20
  *  
  *  To view the Serial Monitor:
  *  Control + Shift + M or Tools > Serial Monitor
@@ -46,16 +55,17 @@ void loop() {
   // Checks if any new serial data has come through.
   // If so, change @blinkRate.
   // Args: &rate, offset, modifier
-  updateRate(blinkRate, 0, 1);
+  updateRate(blinkRate, -4, 1);
   
   // Makes the LED flash for 1 blinkRate of a second.
-  blink(LED_PIN, 1000.0 + blinkRate);
+  blink(LED_PIN, 1000.0 / blinkRate);
 }
 
 /**
  *  Changes the @rate value that is passed in if
  *  a new value has been read in from serial. Value is
- *  clamped to [0-9].
+ *  clamped to [0-9]. The value of @rate will never go
+ *  below 1.
  
  *  @rate - The value to change if a new number has been
  *  passed in through serial.
@@ -72,8 +82,13 @@ void updateRate(int &rate, int offset, int modifier) {
     int delta = clamp(getNumberFromSerial(), 0, 9);
 
     rate += ((delta + offset) * modifier);
+
+    // If rate goes below 1, the program doesn't like it.
+    if (rate < 1) rate = 1;
   
-    Serial.print("Changing speed to: ");
+    Serial.print("Changing speed by ");
+    Serial.print(((delta + offset) * modifier));
+    Serial.print(" to ");
     Serial.println(rate);
   }
 }
@@ -94,7 +109,7 @@ int getNumberFromSerial() {
  *  @high - The upper limit of the number.
  *  @low - The lower limit of the number.
  */
-int clamp(int number, int high, int low) {
+int clamp(int number, int low, int high) {
   if (number > high) number = high;
   if (number < low) number = low;
   return number;
