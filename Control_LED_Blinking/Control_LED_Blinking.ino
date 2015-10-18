@@ -14,7 +14,7 @@
  */
 
 // Defines the ASCII 0 offset.
-#define ASCII_0_OFFSET 48
+const int ASCII_0_OFFSET = 48;
 
 // The pin the LED is connected too.
 const int LED_PIN = 13;
@@ -45,21 +45,24 @@ void setup() {
 void loop() {
   // Checks if any new serial data has come through.
   // If so, change @blinkRate.
-  updateBlinkRate(blinkRate);
+  // Args: &rate, offset, modifier
+  updateRate(blinkRate, 0, 1);
   
   // Makes the LED flash for 1 blinkRate of a second.
-  blink(LED_PIN, 1000.0/blinkRate);
+  blink(LED_PIN, 1000.0 + blinkRate);
 }
 
 /**
- *  Changes the blinkRate value that is passed in if
+ *  Changes the @rate value that is passed in if
  *  a new value has been read in from serial. Value is
  *  clamped to [0-9].
  
- *  @blinkRate - The value to change if a new number has been
+ *  @rate - The value to change if a new number has been
  *  passed in through serial.
+ *  @offset - Offsets the number added to rate
+ *  @modifier - Multipies the delta * offset
  */
-void updateBlinkRate(int &blinkRate) {
+void updateRate(int &rate, int offset, int modifier) {
   // Check to see if there is a new number at serial we haven't
   // read in yet.
   if (Serial.available() > 0) {
@@ -68,10 +71,10 @@ void updateBlinkRate(int &blinkRate) {
     // and 9.
     int delta = clamp0to9(getNumberFromSerial());
 
-    Serial.print("Changing LED speed by: ");
-    Serial.println(delta);
-    
-    blinkRate += delta;
+    rate += ((delta + offset) * modifier);
+  
+    Serial.print("Changing speed to: ");
+    Serial.println(rate);
   }
 }
 
