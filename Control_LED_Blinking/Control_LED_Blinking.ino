@@ -69,7 +69,7 @@ void updateRate(int &rate, int offset, int modifier) {
     
     // Get number from serial and ensure number is between 0
     // and 9.
-    int delta = clamp0to9(getNumberFromSerial());
+    int delta = clamp(getNumberFromSerial(), 0, 9);
 
     rate += ((delta + offset) * modifier);
   
@@ -87,14 +87,16 @@ int getNumberFromSerial() {
 }
 
 /**
- *  If the number is greater than 9 or less than 0, the
- *  number is clamped to 9 or 0 and returned.
+ *  If the number is greater than HIGH or less than LOW, the
+ *  number is clamped to HIGH or LOW and returned.
  
  *  @number - The number to be clamped and returned.
+ *  @high - The upper limit of the number.
+ *  @low - The lower limit of the number.
  */
-int clamp0to9(int number) {
-  if (number > 9) number = 9;
-  if (number < 0) number = 0;
+int clamp(int number, int high, int low) {
+  if (number > high) number = high;
+  if (number < low) number = low;
   return number;
 }
 
