@@ -7,13 +7,14 @@
  *  updated. The value of light must blink at least 1 time a second.
  *  
  *  Serial Encoding:
- *  9 - increase 9
- *  8 - increase 8
+ *  21 - MAX, 21 times a second
+ *  9 - increase to 9
+ *  8 - increase to 8
  *  ...
- *  4 - increase 4
- *  3 - increase 3
+ *  4 - increase to 4
+ *  3 - increase to 3
  *  ...
- *  0 - Flashes 1 time a second
+ *  1 - Flashes 1 time a second
  *  
  *  To view the Serial Monitor:
  *  Control + Shift + M or Tools > Serial Monitor
@@ -115,10 +116,10 @@ void updateRate(int &rate, int offset, int modifier) {
     // controller axis input.
     int delta = clamp(lineNumber, 1, 21);
 
+    Serial.print(rate);
+    
     rate = ((delta + offset) * modifier);
-  
-    Serial.print("Changing speed by ");
-    Serial.print(((delta + offset) * modifier));
+    
     Serial.print(" to ");
     Serial.println(rate);
 
