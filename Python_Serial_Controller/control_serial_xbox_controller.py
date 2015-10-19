@@ -41,7 +41,7 @@ def main():
     print "Adding joystick", joysticks[-1].get_name()
   
   while True:
-    pygame.time.wait(500)
+    pygame.time.wait(60)
 
     # - print "Checking", serialOutputToWrite, lastSerialOutputToWrite
 
