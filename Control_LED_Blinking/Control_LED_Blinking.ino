@@ -25,6 +25,9 @@
 // Defines the ASCII 0 offset.
 const int ASCII_0_OFFSET = 48;
 
+const int ON = 1;
+const int OFF = 0;
+
 // Tells the program if a new line has come in on serial
 int newLine;
 
@@ -35,7 +38,16 @@ int lineNumber;
 const int LED_PIN = 13;
 
 // How fast the LED blinks per minute.
-int blinkRate = 10;
+int blinkRate;
+
+// How many miliseconds have we waited since last blink.
+// We can't just wait(blinkRate) because we have to check
+// the serial every milisecond for new input to remove
+// extreme latency.
+int currentBlinkDelayCount;
+
+// If the LED should be on or off.
+int switchPos;
 
 /**
  *  This is the first method to run. Runs only once, at the
@@ -46,6 +58,10 @@ int blinkRate = 10;
 void setup() {
   // Initializes digital pin LED_PIN as an output.
   pinMode(LED_PIN, OUTPUT);
+
+  blinkRate = 10;
+  currentBlinkDelayCount = 0;
+  switchPos = ON;
 
   // Sets up the Serial libray at 9600 bps (bits per second).
   Serial.begin(9600);
@@ -68,7 +84,10 @@ void loop() {
   updateRate(blinkRate, 0, 1);
   
   // Makes the LED flash for 1 blinkRate of a second.
-  blink(LED_PIN, 1000.0 / blinkRate);
+  switchPos = updateLED(LED_PIN, 1000.0 / blinkRate, switchPos);
+
+  // Hold updateLED by 1 milisecond.
+  delay(1);
 }
 
 /**
@@ -153,11 +172,23 @@ int clamp(int number, int low, int high) {
  *  then assert low for assertTime / 2.
  *  @assertTime - How long the LED should be asserted for,
  *  measured in seconds.
+ *  @switchState - If the LED should be on or off.
+ *  @return - The new state of the switch.
  */
-void blink(int pin, float assertTime) {
-  digitalWrite(pin, HIGH);
-  delay(assertTime / 2.0);
-  digitalWrite(pin, LOW);
-  delay(assertTime / 2.0);
+int updateLED(int pin, float assertTime, int switchState) {
+  // If we have held ON or OFF half of the total assert time, switch.
+  if (currentBlinkDelayCount > assertTime / 2.0) {
+    switchState = (switchState + 1) % 2;
+    currentBlinkDelayCount = 0;
+    if (switchState == ON) {
+      digitalWrite(pin, HIGH);
+    } else {
+      digitalWrite(pin, LOW);
+    }
+  } else {
+    currentBlinkDelayCount++;
+  }
+
+  return switchState;
 }
 
