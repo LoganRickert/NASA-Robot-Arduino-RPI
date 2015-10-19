@@ -2,18 +2,18 @@
  *  Control_LED_Blinking
  *
  *  Controls how many times per second an LED flashes. Flashes
- *  one time a second by default. The LED is controlled by serial
+ *  10 time a second by default. The LED is controlled by serial
  *  in and reports back via serial out when the blinkRate is
  *  updated. The value of light must blink at least 1 time a second.
  *  
  *  Serial Encoding:
- *  9 - increase 25
- *  8 - increase 20
+ *  9 - increase 9
+ *  8 - increase 8
  *  ...
- *  4 - increase 0
- *  3 - increase -5
+ *  4 - increase 4
+ *  3 - increase 3
  *  ...
- *  0 - increase -20
+ *  0 - Flashes 1 time a second
  *  
  *  To view the Serial Monitor:
  *  Control + Shift + M or Tools > Serial Monitor
@@ -25,11 +25,17 @@
 // Defines the ASCII 0 offset.
 const int ASCII_0_OFFSET = 48;
 
+// Tells the program if a new line has come in on serial
+int newLine;
+
+// Tells the program what the entire number that came in on serial was.
+int lineNumber;
+
 // The pin the LED is connected too.
 const int LED_PIN = 13;
 
 // How fast the LED blinks per minute.
-int blinkRate = 1;
+int blinkRate = 10;
 
 /**
  *  This is the first method to run. Runs only once, at the
@@ -43,6 +49,10 @@ void setup() {
 
   // Sets up the Serial libray at 9600 bps (bits per second).
   Serial.begin(9600);
+
+  // There are no new complete numbers from serial yet.
+  newLine = 0;
+  lineNumber = 0;
 }
 
 /**
@@ -55,7 +65,7 @@ void loop() {
   // Checks if any new serial data has come through.
   // If so, change @blinkRate.
   // Args: &rate, offset, modifier
-  updateRate(blinkRate, -4, 1);
+  updateRate(blinkRate, 0, 1);
   
   // Makes the LED flash for 1 blinkRate of a second.
   blink(LED_PIN, 1000.0 / blinkRate);
@@ -76,29 +86,49 @@ void updateRate(int &rate, int offset, int modifier) {
   // Check to see if there is a new number at serial we haven't
   // read in yet.
   if (Serial.available() > 0) {
-    
-    // Get number from serial and ensure number is between 0
-    // and 9.
-    int delta = clamp(getNumberFromSerial(), 0, 9);
+    getLineNumberFromSerial();
+  }
 
-    rate += ((delta + offset) * modifier);
+  // Check if a new number from serial has been read in.
+  if (newLine) {
+    // Get number from serial and ensure number is between 1
+    // and 21. (1 and 21 are arbitrary. Based on [-1 to 1] range of
+    // controller axis input.
+    int delta = clamp(lineNumber, 1, 21);
 
-    // If rate goes below 1, the program doesn't like it.
-    if (rate < 1) rate = 1;
+    rate = ((delta + offset) * modifier);
   
     Serial.print("Changing speed by ");
     Serial.print(((delta + offset) * modifier));
     Serial.print(" to ");
     Serial.println(rate);
+
+    // Reset the values.
+    newLine = 0;
+    lineNumber = 0;
   }
 }
 
 /**
- *  Returns the number passed in through serial minus the 
- *  ASCII offset for 0.
+ *  Gets the entire number passed in through serial, ending in a newline.
+ *  Sets newLine equal to 1 once the entire number has been read in.
+ *  The entire number is stored in lineNumber.
  */
-int getNumberFromSerial() {
-  return (Serial.read() - ASCII_0_OFFSET);
+void getLineNumberFromSerial() {
+  if (Serial.available() > 0) {
+    char character = Serial.read();
+
+    // If we have reached the end of the line.
+    if (character == '\n') {
+      Serial.println(character);
+      newLine = 1;
+    } else {
+      // Make room for new number
+      lineNumber *= 10;
+      // Add number to end of lineNumber.
+      lineNumber += (character - ASCII_0_OFFSET);
+    }
+  }
 }
 
 /**
