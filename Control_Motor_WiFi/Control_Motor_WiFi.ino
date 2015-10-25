@@ -21,6 +21,8 @@
  */
 
 #include <Servo.h>
+#include <SPI.h>
+#include <WiFi.h>
 
 // Defines constants for motor pulse.
 const int FULL_REVERSE = 1250;
@@ -53,6 +55,18 @@ int newLine;
 // Tells the program what the entire number that came in on serial was.
 int lineNumber;
 
+//char ssid[] = "NASA_Robot";
+//char ssid_password[] = "DoctorThomas";
+
+char ssid[] = "rhouse";
+char ssid_password[] = "3v3ryday@h0m3w3s1t";
+
+int status = WL_IDLE_STATUS;
+
+IPAddress server(192, 168, 1, 177);
+
+WiFiClient client;
+
 /**
  *  This is the first method to run. Runs only once, at the
  *  start of the program.
@@ -74,6 +88,52 @@ void setup() {
   servoAPercent = .50;
 
   lastServoAPercent = servoAPercent;
+
+  // check for the presence of the shield:
+  if (WiFi.status() == WL_NO_SHIELD) {
+    Serial.println("WiFi shield not present"); 
+    // don't continue:
+    while(true);
+  }
+
+  // attempt to connect to Wifi network:
+  while (status != WL_CONNECTED) {
+    Serial.print("Attempting to connect to SSID: ");
+    Serial.println(ssid);
+    // Connect to WPA/WPA2 network. Change this line if using open or WEP network:
+    status = WiFi.begin(ssid, ssid_password);
+
+    // wait 10 seconds for connection:
+    delay(10000);
+  }
+  Serial.println("Connected to wifi");
+  printWifiStatus();
+
+  Serial.println(WiFi.firmwareVersion());
+
+  // if you get a connection, report back via serial:
+  if (client.connect(server, 1343)) {
+    Serial.println("connected to server");
+  } else {
+    Serial.println("Not connected!");
+  }
+}
+
+void printWifiStatus() {
+  // print the SSID of the network you're attached to:
+  Serial.print("SSID: ");
+  Serial.println(WiFi.SSID());
+
+  // print your WiFi shield's IP address:
+  IPAddress ip = WiFi.localIP();
+  Serial.print("IP Address: ");
+  Serial.println(ip);
+
+  // print the received signal strength:
+  long rssi = WiFi.RSSI();
+  Serial.print("signal strength (RSSI):");
+  Serial.print(rssi);
+  Serial.println(" dBm");
 }
 
 /**
@@ -83,6 +143,13 @@ void setup() {
  *  Sets the speed of the motor.
  */
 void loop() {
+  // if there are incoming bytes available
+  // from the server, read them and print them:
+  while (client.available()) {
+    char c = client.read();
+    Serial.write(c);
+  }
+  
   // Checks if any new serial data has come through.
   // If so, change @servoASpeed.
   // Args: &rate, offset, modifier

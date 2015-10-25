@@ -23,6 +23,9 @@
  *  Logan Rickert
  */
 
+#include <SPI.h>
+#include <WiFi.h>
+
 // Defines the ASCII 0 offset.
 const int ASCII_0_OFFSET = 48;
 
@@ -37,6 +40,7 @@ int lineNumber;
 
 // The pin the LED is connected too.
 const int LED_PIN = 8;
+const int LED_PIN_2 = 6;
 
 // How fast the LED blinks per minute.
 int blinkRate;
@@ -50,6 +54,20 @@ int currentBlinkDelayCount;
 // If the LED should be on or off.
 int switchPos;
 
+// Name of the WiFi
+char ssid[] = "BoffinCisco";
+
+// WiFi password
+char ssidPassword[] = "boffin111";
+
+// status of the WiFi shield
+int wifiSheildStatus = WL_IDLE_STATUS;
+
+// IP of the server
+IPAddress server(192, 168, 1, 108);
+
+WiFiClient client;
+
 /**
  *  This is the first method to run. Runs only once, at the
  *  start of the program.
@@ -59,6 +77,7 @@ int switchPos;
 void setup() {
   // Initializes digital pin LED_PIN as an output.
   pinMode(LED_PIN, OUTPUT);
+  pinMode(LED_PIN_2, OUTPUT);
 
   blinkRate = 10;
   currentBlinkDelayCount = 0;
@@ -70,6 +89,8 @@ void setup() {
   // There are no new complete numbers from serial yet.
   newLine = 0;
   lineNumber = 0;
+
+  setupWiFi();
 }
 
 /**
@@ -85,7 +106,7 @@ void loop() {
   updateRate(blinkRate, 0, 1);
   
   // Makes the LED flash for 1 blinkRate of a second.
-  switchPos = updateLED(LED_PIN, 1000.0 / blinkRate, switchPos);
+  switchPos = updateLED(LED_PIN, LED_PIN_2, 1000.0 / blinkRate, switchPos);
 
   // Hold updateLED by 1 milisecond.
   delay(1);
@@ -105,7 +126,7 @@ void loop() {
 void updateRate(int &rate, int offset, int modifier) {
   // Check to see if there is a new number at serial we haven't
   // read in yet.
-  if (Serial.available() > 0) {
+  if (client.available()) {
     getLineNumberFromSerial();
   }
 
@@ -135,8 +156,8 @@ void updateRate(int &rate, int offset, int modifier) {
  *  The entire number is stored in lineNumber.
  */
 void getLineNumberFromSerial() {
-  if (Serial.available() > 0) {
-    char character = Serial.read();
+  if (client.available()) {
+    char character = client.read();
 
     // If we have reached the end of the line.
     if (character == '\n') {
@@ -165,6 +186,53 @@ int clamp(int number, int low, int high) {
   return number;
 }
 
+void setupWiFi() {
+  // check for the presence of the shield:
+  if (WiFi.status() == WL_NO_SHIELD) {
+    Serial.println("WiFi shield not present. Quitting."); 
+    // don't continue:
+    while(true);
+  }
+
+  // attempt to connect to Wifi network:
+  while (wifiSheildStatus != WL_CONNECTED) {
+    Serial.print("Attempting to connect to SSID: ");
+    Serial.println(ssid);
+    // Connect to WPA/WPA2 network. Change this line if using open or WEP network:
+    wifiSheildStatus = WiFi.begin(ssid, ssidPassword);
+    
+    // wait 10 seconds for connection:
+    delay(10000);
+  }
+  
+  Serial.println("Connected to wifi");
+  printWifiStatus();
+
+  // if you get a connection, report back via serial:
+  if (client.connect(server, 1338)) {
+    Serial.println("connected to server");
+  } else {
+    Serial.println("Not connected!");
+  }
+}
+
+void printWifiStatus() {
+  // print the SSID of the network you're attached to:
+  Serial.print("SSID: ");
+  Serial.println(WiFi.SSID());
+
+  // print your WiFi shield's IP address:
+  IPAddress ip = WiFi.localIP();
+  Serial.print("IP Address: ");
+  Serial.println(ip);
+
+  // print the received signal strength:
+  long rssi = WiFi.RSSI();
+  Serial.print("signal strength (RSSI):");
+  Serial.print(rssi);
+  Serial.println(" dBm");
+}
+
 /**
  *  blink asserts @pin high for half of @assertTime,
  *  then asserts @pin low for the second half of @assertTime.
@@ -176,15 +244,17 @@ int clamp(int number, int low, int high) {
  *  @switchState - If the LED should be on or off.
  *  @return - The new state of the switch.
  */
-int updateLED(int pin, float assertTime, int switchState) {
+int updateLED(int pin, int pin2, float assertTime, int switchState) {
   // If we have held ON or OFF half of the total assert time, switch.
   if (currentBlinkDelayCount > assertTime / 2.0) {
     switchState = (switchState + 1) % 2;
     currentBlinkDelayCount = 0;
     if (switchState == ON) {
       digitalWrite(pin, HIGH);
+      digitalWrite(pin2, LOW);
     } else {
       digitalWrite(pin, LOW);
+      digitalWrite(pin2, HIGH);
     }
   } else {
     currentBlinkDelayCount++;
