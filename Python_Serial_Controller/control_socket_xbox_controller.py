@@ -1,6 +1,7 @@
 import pygame
 import serial
 from pygame.locals import *
+import socket
 
 #########
 
@@ -15,9 +16,19 @@ WIN_WIDTH = 640
 WIN_HEIGHT = 480
 
 # Connect to the Arduino.
-arduino = serial.Serial('/dev/ttyACM0', 9600)
+server_addr = ('', 1338)
+socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 def main():
+  print 'Starting server on %s:%s' % server_addr
+  socket.bind(server_addr)
+  socket.listen(5)
+
+  print 'Waiting for client...'
+  client, addr = socket.accept()
+  
+  print client, addr
+
   # Wait until the last serial write has finished
   serialWriteDone = True
   # What the new value to write is.
@@ -47,10 +58,10 @@ def main():
 
     if serialWriteDone and serialOutputToWrite != lastSerialOutputToWrite:
       serialWriteDone = False
-      arduino.write(serialOutputToWrite + '\n')
+      client.send(serialOutputToWrite + '\n')
 
-      while arduino.inWaiting() > 0:
-        print arduino.read(arduino.inWaiting())
+      #while arduino.inWaiting() > 0:
+      #  print arduino.read(arduino.inWaiting())
 
       lastSerialOutputToWrite = serialOutputToWrite
       serialWriteDone = True
