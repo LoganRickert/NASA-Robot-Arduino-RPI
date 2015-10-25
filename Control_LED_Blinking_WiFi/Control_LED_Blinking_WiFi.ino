@@ -55,16 +55,16 @@ int currentBlinkDelayCount;
 int switchPos;
 
 // Name of the WiFi
-char ssid[] = "BoffinCisco";
+char ssid[] = "NASA_Robot";
 
 // WiFi password
-char ssidPassword[] = "boffin111";
+char ssidPassword[] = "DoctorThomas";
 
 // status of the WiFi shield
 int wifiSheildStatus = WL_IDLE_STATUS;
 
 // IP of the server
-IPAddress server(192, 168, 1, 108);
+IPAddress server(192, 168, 1, 109);
 
 WiFiClient client;
 

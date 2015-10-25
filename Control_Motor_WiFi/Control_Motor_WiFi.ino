@@ -34,10 +34,16 @@ const int SERVO_RANGE = FULL_FORWARD - STOP;
 const int ASCII_0_OFFSET = 48;
 
 // Attaches an RC signal on this pin that controls servoA.
-const int SERVO_A_PIN = 5;
+const int SERVO_A_PIN = 3;
+const int SERVO_B_PIN = 5;
+const int SERVO_C_PIN = 6;
+const int SERVO_D_PIN = 9;
 
 // Creates a new Servo object to control RoboClaw A.
 Servo servoA;
+Servo servoB;
+Servo servoC;
+Servo servoD;
 
 // How fast servo A is moving, based on percentage.
 // 0 - 49% = Reverse
@@ -60,7 +66,7 @@ char ssid_password[] = "DoctorThomas";
 
 int status = WL_IDLE_STATUS;
 
-IPAddress server(192, 168, 1, 177);
+IPAddress server(192, 168, 1, 109);
 
 WiFiClient client;
 
@@ -73,6 +79,9 @@ WiFiClient client;
 void setup() {
   // Attaches the RC signal on pin SERVO_A_PIN to the servo object 
   servoA.attach(SERVO_A_PIN);
+  servoB.attach(SERVO_B_PIN);
+  servoC.attach(SERVO_C_PIN);
+  servoD.attach(SERVO_D_PIN);
 
   // Sets up the Serial libray at 9600 bps (bits per second).
   Serial.begin(9600);
@@ -109,7 +118,7 @@ void setup() {
   Serial.println(WiFi.firmwareVersion());
 
   // if you get a connection, report back via serial:
-  if (client.connect(server, 1343)) {
+  if (client.connect(server, 1338)) {
     Serial.println("connected to server");
   } else {
     Serial.println("Not connected!");
@@ -140,13 +149,6 @@ void printWifiStatus() {
  *  Sets the speed of the motor.
  */
 void loop() {
-  // if there are incoming bytes available
-  // from the server, read them and print them:
-  while (client.available()) {
-    char c = client.read();
-    Serial.write(c);
-  }
-  
   // Checks if any new serial data has come through.
   // If so, change @servoASpeed.
   // Args: &rate, offset, modifier
@@ -156,7 +158,10 @@ void loop() {
   // If it has, update the servo's speed.
   if (servoAPercent != lastServoAPercent) {
     // Writes the new speed to the RoboClaw's A motor.
-    servoA.writeMicroseconds(STOP + (SERVO_RANGE * servoAPercent));
+    servoA.writeMicroseconds(STOP + (SERVO_RANGE * -servoAPercent));
+    servoB.writeMicroseconds(STOP - (SERVO_RANGE * -servoAPercent));
+    servoC.writeMicroseconds(STOP + (SERVO_RANGE * servoAPercent));
+    servoD.writeMicroseconds(STOP - (SERVO_RANGE * servoAPercent));
 
     lastServoAPercent = servoAPercent;
   }
@@ -175,7 +180,7 @@ void loop() {
 void updateRate(float &rate, int offset, int modifier) {
   // Check to see if there is a new number at serial we haven't
   // read in yet.
-  if (Serial.available() > 0) {
+  if (client.available()) {
     getLineNumberFromSerial();
   }
 
@@ -206,8 +211,8 @@ void updateRate(float &rate, int offset, int modifier) {
  *  The entire number is stored in lineNumber.
  */
 void getLineNumberFromSerial() {
-  if (Serial.available() > 0) {
-    char character = Serial.read();
+  if (client.available()) {
+    char character = client.read();
 
     // If we have reached the end of the line.
     if (character == '\n') {
