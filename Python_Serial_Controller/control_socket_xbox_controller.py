@@ -1,6 +1,7 @@
 import pygame
 import serial
 from pygame.locals import *
+import socket
 
 #########
 
@@ -15,7 +16,7 @@ WIN_WIDTH = 640
 WIN_HEIGHT = 480
 
 # Connect to the Arduino.
-server_addr = ('', 1343)
+server_addr = ('', 1338)
 socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 def main():
@@ -57,10 +58,10 @@ def main():
 
     if serialWriteDone and serialOutputToWrite != lastSerialOutputToWrite:
       serialWriteDone = False
-      socket.send(serialOutputToWrite + '\n')
+      client.send(serialOutputToWrite + '\n')
 
-      while arduino.inWaiting() > 0:
-        print arduino.read(arduino.inWaiting())
+      #while arduino.inWaiting() > 0:
+      #  print arduino.read(arduino.inWaiting())
 
       lastSerialOutputToWrite = serialOutputToWrite
       serialWriteDone = True
