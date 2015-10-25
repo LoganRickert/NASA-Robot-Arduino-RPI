@@ -55,11 +55,8 @@ int newLine;
 // Tells the program what the entire number that came in on serial was.
 int lineNumber;
 
-//char ssid[] = "NASA_Robot";
-//char ssid_password[] = "DoctorThomas";
-
-char ssid[] = "rhouse";
-char ssid_password[] = "3v3ryday@h0m3w3s1t";
+char ssid[] = "NASA_Robot";
+char ssid_password[] = "DoctorThomas";
 
 int status = WL_IDLE_STATUS;
 
