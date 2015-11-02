@@ -31,19 +31,29 @@ const int FULL_FORWARD = 1750;
 const int SERVO_RANGE = FULL_FORWARD - STOP;
 
 // Defines the ASCII 0 offset.
-const int ASCII_0_OFFSET = 48;
+const int ASCII_0_OFFSET = '0';
+
+// Defines the ASCII A offset.
+// We want 'A' to == 1.
+const int ASCII_A_OFFSET = 'A' - 1;
 
 // Attaches an RC signal on this pin that controls servoA.
-const int SERVO_A_PIN = 3;
-const int SERVO_B_PIN = 5;
-const int SERVO_C_PIN = 6;
-const int SERVO_D_PIN = 9;
+const int SERVO_A_PIN = 48;
+const int SERVO_B_PIN = 44;
+const int SERVO_C_PIN = 40;
+const int SERVO_D_PIN = 36;
+const int LINEAR_A_PIN = 47;
+
+const int LED_PIN = 24;
+const int LED_PIN_2 = 25;
+const int LED_PIN_3 = 22;
 
 // Creates a new Servo object to control RoboClaw A.
 Servo servoA;
 Servo servoB;
 Servo servoC;
 Servo servoD;
+Servo linearA;
 
 // How fast servo A is moving, based on percentage.
 // 0 - 49% = Reverse
@@ -61,12 +71,18 @@ int newLine;
 // Tells the program what the entire number that came in on serial was.
 int lineNumber;
 
+// What we should do with lineNumber.
+// 1 - Forward / Backwards
+// 2 - Left / Right
+int command;
+int readCommand;
+
 char ssid[] = "NASA_Robot";
 char ssid_password[] = "DoctorThomas";
 
 int status = WL_IDLE_STATUS;
 
-IPAddress server(192, 168, 1, 109);
+IPAddress server(192, 168, 1, 110);
 
 WiFiClient client;
 
@@ -82,6 +98,15 @@ void setup() {
   servoB.attach(SERVO_B_PIN);
   servoC.attach(SERVO_C_PIN);
   servoD.attach(SERVO_D_PIN);
+  linearA.attach(LINEAR_A_PIN);
+
+  pinMode(LED_PIN, OUTPUT);
+  pinMode(LED_PIN_2, OUTPUT);
+  pinMode(LED_PIN_3, OUTPUT);
+  
+  digitalWrite(LED_PIN, LOW);
+  digitalWrite(LED_PIN_2, LOW);
+  digitalWrite(LED_PIN_3, LOW);
 
   // Sets up the Serial libray at 9600 bps (bits per second).
   Serial.begin(9600);
@@ -89,16 +114,25 @@ void setup() {
   // There are no new complete numbers from serial yet.
   newLine = 0;
   lineNumber = 0;
+  readCommand = 0;
+  command = 0;
 
   // Start servo A at speed 50.
   servoAPercent = .50;
 
   lastServoAPercent = servoAPercent;
+  
+  servoA.writeMicroseconds(STOP - 50);
+  servoB.writeMicroseconds(STOP - 50);
+  servoC.writeMicroseconds(STOP - 50);
+  servoD.writeMicroseconds(STOP - 50);
+  linearA.writeMicroseconds(STOP - 42);
 
   // check for the presence of the shield:
   if (WiFi.status() == WL_NO_SHIELD) {
-    Serial.println("WiFi shield not present"); 
-    // don't continue:
+    Serial.println("WiFi shield not present. Writing out."); 
+    // Don't continue:
+    digitalWrite(LED_PIN, HIGH);
     while(true);
   }
 
@@ -109,19 +143,21 @@ void setup() {
     // Connect to WPA/WPA2 network. Change this line if using open or WEP network:
     status = WiFi.begin(ssid, ssid_password);
 
-    // wait 10 seconds for connection:
-    delay(10000);
+    // Wait 10 seconds for connection:
+    blinkLED(LED_PIN, 10);
   }
   Serial.println("Connected to wifi");
   printWifiStatus();
 
-  Serial.println(WiFi.firmwareVersion());
+  connectToServer();
+}
 
-  // if you get a connection, report back via serial:
-  if (client.connect(server, 1338)) {
-    Serial.println("connected to server");
-  } else {
-    Serial.println("Not connected!");
+void blinkLED(int led, int times) {
+  for (int i = 0; i < times; i++) {
+    digitalWrite(led, HIGH);
+    delay(500);
+    digitalWrite(led, LOW);
+    delay(500);
   }
 }
 
@@ -157,13 +193,19 @@ void loop() {
   // Checks to see if the speed has changed.
   // If it has, update the servo's speed.
   if (servoAPercent != lastServoAPercent) {
-    // Writes the new speed to the RoboClaw's A motor.
-    servoA.writeMicroseconds(STOP + (SERVO_RANGE * -servoAPercent));
-    servoB.writeMicroseconds(STOP - (SERVO_RANGE * -servoAPercent));
-    servoC.writeMicroseconds(STOP + (SERVO_RANGE * servoAPercent));
-    servoD.writeMicroseconds(STOP - (SERVO_RANGE * servoAPercent));
-
+    Serial.println(command);
+    if (command == 1) {
+      // Writes the new speed to the RoboClaw's A motor.
+      servoA.writeMicroseconds(STOP + (SERVO_RANGE * -servoAPercent) - 50);
+      servoB.writeMicroseconds(STOP - (SERVO_RANGE * -servoAPercent) - 50);
+      servoC.writeMicroseconds(STOP + (SERVO_RANGE * -servoAPercent) - 50);
+      servoD.writeMicroseconds(STOP - (SERVO_RANGE * -servoAPercent) - 50);
+    } else if (command == 2) {
+      linearA.writeMicroseconds(STOP + (SERVO_RANGE * -servoAPercent) - 42);
+    }
+    
     lastServoAPercent = servoAPercent;
+    command = 0;
   }
 }
 
@@ -178,6 +220,15 @@ void loop() {
  *  @modifier - Multipies the delta * offset
  */
 void updateRate(float &rate, int offset, int modifier) {
+  if (!client.connected()) {
+     Serial.println("No longer connected! Stopping motors.");
+     servoA.writeMicroseconds(STOP - 50);
+     servoB.writeMicroseconds(STOP - 50);
+     servoC.writeMicroseconds(STOP - 50);
+     servoD.writeMicroseconds(STOP - 50);
+     linearA.writeMicroseconds(STOP - 42);
+     connectToServer();
+  }
   // Check to see if there is a new number at serial we haven't
   // read in yet.
   if (client.available()) {
@@ -188,13 +239,16 @@ void updateRate(float &rate, int offset, int modifier) {
   if (newLine) {
     // Get number from serial and ensure number is between 1
     // and 21.
-    int delta = clamp(lineNumber, 0, 40);
+    int delta = clamp(lineNumber, 0, 20);
 
+    Serial.print(command);
+    Serial.print(" ");
     Serial.print(rate);
 
     // Get the percentage with 11 being 0%.
     // Will be between -100% and 100%.
-    rate = ((delta - 20) / 20.0);
+    rate = ((delta - 10) / 10.0);
+    command = readCommand;
     
     Serial.print(" to ");
     Serial.println(rate);
@@ -202,7 +256,25 @@ void updateRate(float &rate, int offset, int modifier) {
     // Reset the values.
     newLine = 0;
     lineNumber = 0;
+    readCommand = 0;
   }
+}
+
+void connectToServer() {
+  // if you get a connection, report back via serial:
+  digitalWrite(LED_PIN_2, HIGH);
+  digitalWrite(LED_PIN_3, LOW);
+  while (!client.connect(server, 1338)) {
+    Serial.println("Not connected!");
+    // Wait 5 seconds
+    blinkLED(LED_PIN_2, 5);
+    digitalWrite(LED_PIN_2, HIGH);
+  }
+  
+  digitalWrite(LED_PIN_2, LOW);
+  digitalWrite(LED_PIN_3, HIGH); 
+  
+  Serial.println("Connected to server!");
 }
 
 /**
@@ -216,13 +288,20 @@ void getLineNumberFromSerial() {
 
     // If we have reached the end of the line.
     if (character == '\n') {
-      Serial.println(character);
+      Serial.print("Final: ");
+      Serial.print(readCommand);
+      Serial.print(" ");
+      Serial.println(lineNumber);
       newLine = 1;
     } else {
-      // Make room for new number
-      lineNumber *= 10;
-      // Add number to end of lineNumber.
-      lineNumber += (character - ASCII_0_OFFSET);
+      if (!readCommand) {
+        readCommand = (character - ASCII_A_OFFSET);
+      } else {
+        // Make room for new number
+        lineNumber *= 10;
+        // Add number to end of lineNumber.
+        lineNumber += (character - ASCII_0_OFFSET);
+      }
     }
   }
 }
