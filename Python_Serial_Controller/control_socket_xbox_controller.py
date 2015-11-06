@@ -4,6 +4,7 @@ from pygame.locals import *
 import socket
 from threading import Lock
 from threading import Thread
+import time
 
 #########
 
@@ -27,18 +28,91 @@ def main():
 
   createServer(mySocket)
 
-  delLock = Lock()
+  delLock = False
+
+  arduinoLock = Lock()
+
+  global arduinoState
+  arduinoState = "10"
+
+  arduinoStateLock = Lock()
 
   while True:
-    with delLock:
-      print 'Waiting for client...'
-      client, addr = mySocket.accept()
+    print 'Waiting for client...'
+    client, addr = mySocket.accept()
 
-      thread = Thread(target = run_client, args = (client, ))
+    thread = None
+    data = recvall(client)
+
+    if data == 'arduino':
+      if not delLock:
+        print 'Starting arduino'
+        client.send('okay')
+        thread1 = Thread(target = run_client, args = (client, arduinoLock))
+        thread1.start()
+        thread2 = Thread(target = update_client, args = (client, arduinoLock, arduinoStateLock))
+        thread2.start()
+        delLock = True
+      else:
+        client.send('bad')
+        client.close()
+    elif data == 'phone':
+      print 'Starting phone'
+      thread = Thread(target = run_phone, args = (client, arduinoStateLock))
       thread.start()
-      thread.join()
+    else:
+      print 'Nope.', list(data)
+      client.close()
 
-def run_client(client):
+def recvall(socket):
+  data = "z"
+
+  print "Got a connection!"
+
+  while data[-1] != "\n":
+    packet = socket.recv(1024)
+    print list(packet)
+    data += packet
+
+  return ''.join(data[1:].split())
+
+def stateRecvall(socket):
+  data = "z"
+
+  print "Got a connection!"
+
+  while data[-1] != "\n":
+    packet = socket.recv(1024)
+    print list(packet)
+    data += packet
+
+  return data[1:].split()[-1]
+
+def run_phone(client, arduinoStateLock):
+  client.send('connected\n')
+
+  global arduinoState
+  lastArduinoState = arduinoState
+
+  while True:
+    time.sleep(1)
+
+    with arduinoStateLock:
+      client.send(arduinoState + "\n")
+
+def update_client(client, arduinoLock, arduinoStateLock):
+  print "Running update client"
+
+  global arduinoState
+
+  while True:
+    time.sleep(1)
+
+    with arduinoStateLock:
+      arduinoState = stateRecvall(client)
+      print ":", arduinoState
+
+def run_client(client, arduinoLock):
   # Wait until the last serial write has finished
   serialWriteDoneA = True
   # What the new value to write is.
@@ -71,7 +145,8 @@ def run_client(client):
     if serialWriteDoneA and serialOutputToWriteA != lastSerialOutputToWriteA:
       serialWriteDoneA = False
       print "A" + serialOutputToWriteA
-      client.send("A" + serialOutputToWriteA + '\n')
+      with arduinoLock:
+        client.send("A" + serialOutputToWriteA + '\n')
 
       lastSerialOutputToWriteA = serialOutputToWriteA
       serialWriteDoneA = True
@@ -79,7 +154,8 @@ def run_client(client):
     if serialWriteDoneB and serialOutputToWriteB != lastSerialOutputToWriteB:
       serialWriteDoneB = False
       print "B" + serialOutputToWriteB
-      client.send("B" + serialOutputToWriteB + '\n')
+      with arduinoLock:
+        client.send("B" + serialOutputToWriteB + '\n')
 
       lastSerialOutputToWriteB = serialOutputToWriteB
       serialWriteDoneB = True
