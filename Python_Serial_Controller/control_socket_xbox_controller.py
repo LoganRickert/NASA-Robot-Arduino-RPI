@@ -45,17 +45,12 @@ def main():
     data = recvall(client)
 
     if data == 'arduino':
-      if not delLock:
-        print 'Starting arduino'
-        client.send('okay')
-        thread1 = Thread(target = run_client, args = (client, arduinoLock))
-        thread1.start()
-        thread2 = Thread(target = update_client, args = (client, arduinoLock, arduinoStateLock))
-        thread2.start()
-        delLock = True
-      else:
-        client.send('bad')
-        client.close()
+      print 'Starting arduino'
+      client.send('okay')
+      thread1 = Thread(target = run_client, args = (client, arduinoLock))
+      thread1.start()
+      thread2 = Thread(target = update_client, args = (client, arduinoLock, arduinoStateLock))
+      thread2.start()
     elif data == 'phone':
       print 'Starting phone'
       thread = Thread(target = run_phone, args = (client, arduinoStateLock))
@@ -95,7 +90,7 @@ def run_phone(client, arduinoStateLock):
   lastArduinoState = arduinoState
 
   while True:
-    time.sleep(1)
+    time.sleep(.100)
 
     with arduinoStateLock:
       client.send(arduinoState + "\n")
@@ -106,7 +101,7 @@ def update_client(client, arduinoLock, arduinoStateLock):
   global arduinoState
 
   while True:
-    time.sleep(1)
+    time.sleep(.100)
 
     with arduinoStateLock:
       arduinoState = stateRecvall(client)
