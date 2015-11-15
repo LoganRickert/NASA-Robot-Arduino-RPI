@@ -55,16 +55,16 @@ int currentBlinkDelayCount;
 int switchPos;
 
 // Name of the WiFi
-char ssid[] = "BoffinCisco";
+char ssid[] = "NASA_Robot";
 
 // WiFi password
-char ssidPassword[] = "boffin111";
+char ssidPassword[] = "DoctorThomas";
 
 // status of the WiFi shield
 int wifiSheildStatus = WL_IDLE_STATUS;
 
 // IP of the server
-IPAddress server(192, 168, 1, 108);
+IPAddress server(192, 168, 1, 188);
 
 WiFiClient client;
 
@@ -124,6 +124,11 @@ void loop() {
  *  @modifier - Multipies the delta * offset
  */
 void updateRate(int &rate, int offset, int modifier) {
+  if (!client.connected()) {
+     Serial.println("No longer connected! Stopping motors.");
+     rate = 1;
+     connectToServer();
+  }
   // Check to see if there is a new number at serial we haven't
   // read in yet.
   if (client.available()) {
@@ -208,12 +213,17 @@ void setupWiFi() {
   Serial.println("Connected to wifi");
   printWifiStatus();
 
+  connectToServer();
+}
+
+void connectToServer() {
   // if you get a connection, report back via serial:
-  if (client.connect(server, 1338)) {
-    Serial.println("connected to server");
-  } else {
+  while (!client.connect(server, 1338)) {
     Serial.println("Not connected!");
+    delay(5000);
   }
+  
+  Serial.println("Connected to server!");
 }
 
 void printWifiStatus() {
