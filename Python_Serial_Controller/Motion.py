@@ -1,3 +1,4 @@
+import serial
 
 class Motion:
 
@@ -10,35 +11,37 @@ class Motion:
 		self.cConveryerMotor = 0
 		self.cSteeringAct = 0
 		self.cBucketAct = 0
+                self.cSer = serial.Serial(port='/dev/ttyACM0', baudrate=9600)     
+
 
 	def cBackLeftWheelSend(self, aRecievedSpeed):
 		cBackLeftWheel = aRecievedSpeed
-		# serial.send()
+                cSer.send(cBackLeftWheel)
 
 	def cBackRightWheelSend(self, aRecievedSpeed):
 		cBackRightWheel = aRecievedSpeed
-		# serial.send()
+                cSer.send(cBackRightWheel)
 
 	def cFrontLeftWheelSend(self, aRecievedSpeed):
 		cFrontLeftWheel = aRecievedSpeed
-		# serial.send()
+                cSer.send(cFrontLeftWheel)
 
 	def cFrontRightWheelSend(self, aRecievedSpeed):
 		cFrontRightWheel = aRecievedSpeed
-		# serial.send()
+                cSer.send(cFrontRightWheel)
 
 	def cBucketMotorSend(self, aRecievedSpeed):
 		cBucketMotor = aRecievedSpeed
-		# serial.send()
+                cSer.send(cBucketMotor)
 
 	def cConveryerMotorSend(self, aRecievedSpeed):
 		cConveryerMotor = aRecievedSpeed
-		# serial.send()
+                cSer.send(cConveryerMotor)
 
 	def cSteeringActSend(self, aRecievedSpeed):
 		cSteeringAct = aRecievedSpeed
-		# serial.send()
+                cSer.send(cSteeringAct)
 
 	def cBucketActSend(self, aRecievedSpeed):
 		cBucketAct = aRecievedSpeed
-		# serial.send()
+                cSer.send(cBucketAct)
