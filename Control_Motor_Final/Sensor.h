@@ -10,25 +10,25 @@ class Sensor {
 		~Sensor();
 		
         //Ron: Function used to get the encoder value
-        int backLeftWheelEncoderGet();
+        int getBackLeftWheelEncoder();
 
         //Ron: Function used to get the encoder value
-        int backRightWheelEncoderGet();
+        int getBackRightWheelEncoder();
 
         //Ron: Function used to get the encoder value
-        int frontLeftWheelEncoderGet();
+        int getFrontLeftWheelEncoder();
 
         //Ron: Function used to get the encoder value
-        int frontRightWheelEncoderGet();
+        int getFrontRightWheelEncoder();
 
         //Ron: Function used to get the stearing angle
-        int steeringActSensorGet();
+        int getSteeringActSensor();
 
         //Ron: Function used to get the bucket system angle
-        int bucketActSensorGet();
+        int getBucketActSensor();
 
         //Ron: Function used to get the robot distance from object in back
-        int IRGet();
+        int getIRBack();
 
 	private:
   		// Ron: Class Properties

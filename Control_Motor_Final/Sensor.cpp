@@ -1,39 +1,40 @@
+
 // Ron: Class will be used to read the sensors (sensor objects)
 
 #include "Sensor.h"
 
 // Ron: Function used to get the encoder value
-int Sensor::backLeftWheelEncoderGet() {
+int Sensor::getBackLeftWheelEncoder() {
     return analogRead(cBackLeftWheelEncoder);
 }
 
 // Ron: Function used to get the encoder value
-int Sensor::backRightWheelEncoderGet() {
+int Sensor::getBackRightWheelEncoder() {
     return analogRead(cBackRightWheelEncoder);
 }
 
 // Ron: Function used to get the encoder value
-int Sensor::frontLeftWheelEncoderGet() {
+int Sensor::getFrontLeftWheelEncoder() {
     return analogRead(cFrontLeftWheelEncoder);
 }
 
 // Ron: Function used to get the encoder value
-int Sensor::frontRightWheelEncoderGet() {
+int Sensor::getFrontRightWheelEncoder() {
     return analogRead(cFrontRightWheelEncoder);
 }
 
 // Ron: Function used to get the stearing angle
-int Sensor::steeringActSensorGet() {
+int Sensor::getSteeringActSensor() {
     return analogRead(cSteeringActSensor);
 }
 
 // Ron: Function used to get the bucket system angle
-int Sensor::bucketActSensorGet() {
+int Sensor::getBucketActSensor() {
     return analogRead(cBucketActSensor);
 }
 
 // Ron: Function used to get the robot distance from object in back
-int Sensor::IRGet() {
+int Sensor::getIRBack() {
     return analogRead(cIRBack);
 }
 

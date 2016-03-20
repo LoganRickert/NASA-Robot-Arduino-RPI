@@ -66,11 +66,129 @@ void setup() {
 }
 
 void loop() {
-  // read serial valuesm parse this for values
-  //int num = Serial.read();
+  // Check if we have gotten
+  // a new command. If so,
+  // process it.
+  functionB();
+}
 
-//  passMotion(lfor,num);
+// If command == 0, the last command
+// has been processed
+char command;
 
-  // write sensor values
-//  Serial.write();
+// The argument to the command
+int arg;
+
+// If ready, command is ready
+// to be processed.
+bool readyForNewCommand;
+
+// A = motors
+// arg = set speed
+// B = motor left front
+// arg = set left front speed
+
+/**
+ * @breif
+ */
+void functionA() {
+  while (Serial.avaiable() > 0) {
+    // Make sure the last command
+    // is processed before we
+    // start anew and overwritting it.
+    if (readyForNewCommand == false) {
+      if (getCommandType == 0) {
+        // get the command
+        getCommandType = Serial.read();
+      } else {
+        // get next character
+        char character = Serial.read();
+
+        // If character is \n, it's the
+        // end of the current command.
+        if (character == '\n') {
+          readyForNewCommand = true;
+        } else {
+          // Shift arg by 1 to make room
+          // for the new number.
+          arg *= 10;
+          arg += (character - '0');
+        }
+      }
+    }
+  }
+}
+
+// This runs at the start of the
+// main loop.
+void functionB() {
+  // Update input from serial.
+  functionA();
+
+  if (ready == true) {
+    doStuff(commandType, arg);
+    readyForNewCommand = false;
+    commandType = 0;
+    arg = 0;
+  }
+}
+
+void doStuff(char command, int arg) {
+  switch (command) {
+    case 'A':
+      motion.cDriveWheelsWrite(arg);
+      break;
+    case 'B':
+      motion.cDriveBLWWrite(arg);
+      break;
+    case 'C':
+      motion.cDriveBRWWrite(arg);
+      break;
+    case 'D':
+      motion.cDriveFLWWrite(arg);
+      break;
+    case 'E':
+      motion.cDriveFRWWrite(arg);
+      break;
+    case 'F':
+      motion.cDriveBucketWrite(arg);
+      break;
+    case 'G':
+      motion.cDriveConveyerWrite(arg);
+      break;
+    case 'H':
+      motion.cMoveSteeringWrite(arg);
+      break;
+    case 'I':
+      motion.cMoveBucketsWrite(arg);
+      break;
+    case 'J':
+      Serial.print('J');
+      Serial.println(sensor.getBackLeftWheelEncoder());
+      break;
+    case 'K':
+      Serial.print('K');
+      Serial.println(sensor.getBackRightWheelEncoder());
+      break;
+    case 'L':
+      Serial.print('L');
+      Serial.println(sensor.getFrontLeftWheelEncoder());
+      break;
+    case 'M':
+      Serial.print('M');
+      Serial.println(sensor.getFrontRightWheelEncoder());
+      break;
+    case 'N':
+      Serial.print('N');
+      Serial.println(sensor.getSteeringActSensor());
+      break;
+    case 'O':
+      Serial.print('O');
+      Serial.println(sensor.getBucketActSensor());
+      break;
+    case 'P':
+      Serial.print('P');
+      Serial.println(sensor.getIRBack());
+      break;
+  }
 }
