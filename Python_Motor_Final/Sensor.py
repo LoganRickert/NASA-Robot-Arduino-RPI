@@ -1,6 +1,6 @@
 
 import serial
-from threading import lock
+import time
 
 # sensor class
 class Sensor:
@@ -15,44 +15,71 @@ class Sensor:
         self.cBucketActSensor = 0
         self.cIRBack = 0
 
-    def cBackLeftWheelEncoderRead(self, lock, aSer):
-        lock.acquire()
-        aSer.write('J0\n')
-        cBackLeftWheelEncoder = aSer.readline()[1:-1]
-        lock.release()
+        self.cBackLeftWheelEncoderTime = time.time()
+        self.cBackRightWheelEncoderTime = time.time()
+        self.cFrontLeftWheelEncoderTime = time.time()
+        self.cFrontRightWheelEncoderTime = time.time()
+        self.cSteeringActSensorTime = time.time()
+        self.cBucketActSensorTime = time.time()
+        self.cIRBackTime = time.time()
 
-    def cBackRightWheelEncoderRead(self, lock, aSer):
-        lock.acquire()
-        aSer.write('K0\n')
-        cBackRightWheelEncoder = aSer.readline()[1:-1]
-        lock.release()
+    def update(self, print_lock, information):
+        information = information.split('-'):
 
-    def cFrontLeftWheelEncoderRead(self, lock, aSer):
-        lock.acquire()
-        aSer.write('L0\n')
-        cFrontLeftWheelEncoder = aSer.readline()[1:-1]
-        lock.release()
+        if len(information) == 7:
+            self.cBackLeftWheelEncoder = information[0]
+            self.cBackRightWheelEncoder = information[1]
+            self.cFrontLeftWheelEncoder = information[2]
+            self.cFrontRightWheelEncoder = information[3]
+            self.cSteeringActSensor = information[4]
+            self.cBucketActSensor = information[5]
+            self.cIRBack = information[6]
+        else:
+            with print_lock:
+                print "Something's gone bad with update!"
+                print "Got: ", information
 
-    def cFrontRightWheelEncoderRead(self, lock, aSer):
-        lock.acquire()
-        aSer.write('M0\n')
-        cFrontRightWheelEncoder = aSer.readline()[1:-1]
-        lock.release()
+    # def writeread(self, serial_lock, aSer, to_write):
+    #     value = None
 
-    def cSteeringActSensorRead(self, lock, aSer):
-        lock.acquire()
-        aSer.write('N0\n')
-        cSteeringActSensor = aSer.readline()[1:-1]
-        lock.release()
+    #     with serial_lock:
+    #         aSer.write(to_write)
+    #         aSer.flushOutput()
+    #         value = aSer.readline()[:-1]
 
-    def cBucketActSensorRead(self, lock, aSer):
-        lock.acquire()
-        aSer.write('O0\n')
-        cSteeringActSensor = aSer.readline()[1:-1]
-        lock.release()
+    #     return value
 
-    def cIRBack(self, lock, aSer):
-        lock.acquire()
-        aSer.write('P0\n')
-        cIRBack = aSer.readline()[1:-1]
-        lock.release()
+    # def cBackLeftWheelEncoderRead(self, serial_lock, aSer):
+    #     if time.time() > self.cBackLeftWheelEncoderTime + 0.250:
+    #         cBackLeftWheelEncoder = self.writeread(serial_lock, aSer, 'J0\n')[1:]
+    #         self.cBackLeftWheelEncoderTime = time.time()
+
+    # def cBackRightWheelEncoderRead(self, serial_lock, aSer):
+    #     if time.time() > self.cBackRightWheelEncoderTime + 0.250:
+    #         self.cBackRightWheelEncoder = self.writeread(serial_lock, aSer, 'K0\n')[1:]
+    #         self.cBackRightWheelEncoderTime = time.time()
+
+    # def cFrontLeftWheelEncoderRead(self, serial_lock, aSer):
+    #     if time.time() > self.cFrontLeftWheelEncoderTime + 0.250:
+    #         self.cFrontLeftWheelEncoder = self.writeread(serial_lock, aSer, 'L0\n')[1:]
+    #         self.cFrontLeftWheelEncoderTime = time.time()
+
+    # def cFrontRightWheelEncoderRead(self, serial_lock, aSer):
+    #     if time.time() > self.cFrontRightWheelEncoderTime + 0.250:
+    #         self.cFrontRightWheelEncoder = self.writeread(serial_lock, aSer, 'M0\n')[1:]
+    #         self.cFrontRightWheelEncoderTime = time.time()
+
+    # def cSteeringActSensorRead(self, serial_lock, aSer):
+    #     if time.time() > self.cSteeringActSensorTime + 0.250:
+    #         self.cSteeringActSensor = self.writeread(serial_lock, aSer, 'N0\n')[1:]
+    #         self.cSteeringActSensorTime = time.time()
+
+    # def cBucketActSensorRead(self, serial_lock, aSer):
+    #     if time.time() > self.cBucketActSensorTime + 0.250:
+    #         self.cBucketActSensor = self.writeread(serial_lock, aSer, 'O0\n')[1:]
+    #         self.cBucketActSensorTime = time.time()
+
+    # def cIRBack(self, serial_lock, aSer):
+    #     if time.time() > self.cIRBackTime + 0.250:
+    #         self.cIRBack = self.writeread(serial_lock, aSer, 'P0\n')[1:]
+    #         self.cIRBackTime = time.time()

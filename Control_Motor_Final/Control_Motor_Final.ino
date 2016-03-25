@@ -70,6 +70,26 @@ void loop() {
   // a new command. If so,
   // process it.
   functionB();
+
+  sendUpdateData();
+
+  delay(100);
+}
+
+void sendUpdateData() {
+  Serial.print(sensor.getBackLeftWheelEncoder());
+  Serial.print('-');
+  Serial.print(sensor.getBackRightWheelEncoder());
+  Serial.print('-');
+  Serial.print(sensor.getFrontLeftWheelEncoder());
+  Serial.print('-');
+  Serial.print(sensor.getFrontRightWheelEncoder());
+  Serial.print('-');
+  Serial.print(sensor.getSteeringActSensor());
+  Serial.print('-');
+  Serial.print(sensor.getBucketActSensor());
+  Serial.print('-');
+  Serial.println(sensor.getIRBack());
 }
 
 // If command == 0, the last command
@@ -92,7 +112,7 @@ bool readyForNewCommand;
  * @breif
  */
 void functionA() {
-  while (Serial.avaiable() > 0) {
+  while (!readyForNewCommand && Serial.avaiable() > 0) {
     // Make sure the last command
     // is processed before we
     // start anew and overwritting it.
@@ -122,14 +142,17 @@ void functionA() {
 // This runs at the start of the
 // main loop.
 void functionB() {
-  // Update input from serial.
-  functionA();
 
-  if (ready == true) {
-    doStuff(commandType, arg);
-    readyForNewCommand = false;
-    commandType = 0;
-    arg = 0;
+  while (Serial.avaiable() > 0) {
+    // Update input from serial.
+    functionA();
+
+    if (ready == true) {
+      doStuff(commandType, arg);
+      readyForNewCommand = false;
+      commandType = 0;
+      arg = 0;
+    }
   }
 }
 
