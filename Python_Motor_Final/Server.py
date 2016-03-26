@@ -4,6 +4,8 @@ from threading import Lock
 import time
 import settings
 
+import binascii
+
 # import pygame
 # from pygame.locals import *
 
@@ -75,7 +77,7 @@ def run(print_lock, client_socket):
                 ]) + '\n')
 
             if item[0] == 'R':
-                client_socket.send(get_picture(int(item[1])).encode('utf-8') + '\n'.encode('utf-8'))
+                client_socket.send(binascii.hexlify(get_picture(int(item[1]))) + '\n')
 
 def get_picture(which_picture):
     return settings.camera.get_image(which_picture)
