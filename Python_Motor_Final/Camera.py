@@ -4,6 +4,8 @@ from pygame.locals import *
 import cv2
 import bz2
 
+import time
+
 class Camera:
     def __init__(self):
         self.size = (640, 360)
@@ -44,8 +46,10 @@ class Camera:
 
         pixels = []
 
-        for x in range(0, 640, 4):
-            for y in range(0, 360, 4):
+        time_start = time.time()
+
+        for x in range(0, 640, 3):
+            for y in range(0, 360, 3):
                 wentThrough += 1
                 col = pxarrayA[x, y]
                 new_val = ((((((col >> 16) & 0xff)*76) + (((col >> 8) & 0xff)*150) + \
@@ -56,6 +60,8 @@ class Camera:
                 pixels.append(color)
                 pxarrayB[x, y] = (color * div, color * div, color * div)
 
+        print "Took:", (time.time() - time_start)
+
         del pxarrayA
         del pxarrayB
         print "Went through:", wentThrough, self.compress(pixels)
@@ -64,7 +70,9 @@ class Camera:
         pygame.display.flip()
 
     def compress(self, pixels):
+        time_start = time.time()
         compresseda = bz2.compress(''.join(str(pixels)), 9)
+        print "C took:", (time.time() - time_start)
         print 'new lista length:', len(compresseda) * 8
         
         return len(compresseda)
@@ -74,7 +82,7 @@ def main():
 
     while True:
         camera.get_and_flip(0)
-        pygame.time.wait(1000)
+        pygame.time.wait(500)
 
 if __name__ == "__main__":
     main()
