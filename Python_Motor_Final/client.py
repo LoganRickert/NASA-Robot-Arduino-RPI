@@ -29,7 +29,7 @@ def main():
 
         if console[0] == 'R':
             temp = ''.join(recvall(client))
-            print bz2.decompress(temp.decode('ascii'))
+            print bz2.decompress(temp.decode('unicode'))
 
         if console == 'quit':
             should_continue = False
