@@ -11,8 +11,10 @@ import Sensor
 
 def main():
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client.connect(('', 1337))
+    client.connect(('127.0.0.1', 1338))
     client.send('superawesomesecurepassword\n')
+
+    print recvall(client)
 
     should_continue = True
 
@@ -21,22 +23,27 @@ def main():
         client.send(console + '\n')
 
         if console[0] in 'JKLMNOPQ':
-            print 'Got back:', client.recvall(client)
+            print 'Got back:', recvall(client)
+
+        if console == 'quit':
+            should_continue = false
+            client.close()
 
 def recvall(client_socket):
-    data = ""
-
-    with print_lock:
-        print "Recving data!"
+    data = "z"
+    
+    print "Recving data!"
 
     while data[-1] != "\n":
         packet = client_socket.recv(1024)
         data += packet
 
-    with print_lock:
-        print data.split('\n')
+    data = data[1:] # We need the z so we can check data[-1]
+                    # It will give out of bounce error otherwise.
 
-    return data.split('\n')
+    print 'Recving:', data.split('\n')[:-1]
+
+    return data.split('\n')[:-1]
 
 if __name__ == "__main__":
     main()

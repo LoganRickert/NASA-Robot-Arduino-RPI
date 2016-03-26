@@ -1,6 +1,7 @@
 
 import serial
-from threading import lock
+from threading import Lock
+import settings
 
 class Motion:
 
@@ -15,9 +16,7 @@ class Motion:
         self.cBucketAct = 0
 
     def write(self, to_write):
-        global arduino_to_write
-
-        arduino_to_write.append(to_write)
+        settings.arduino_to_write.append(to_write)
 
     def cAllWheelsWrite(self, aRecievedSpeed):
         if not all(x == aRecievedSpeed for x in (self.cBackLeftWheel, self.cBackRightWheel, self.cFrontLeftWheel, self.cFrontRightWheel)):

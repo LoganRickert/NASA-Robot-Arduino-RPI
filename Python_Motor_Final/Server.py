@@ -1,99 +1,101 @@
 
 import socket
-from threading import lock
+from threading import Lock
 import time
+import settings
 
 # import pygame
 # from pygame.locals import *
 
-def run(print_lock, serial_lock, rasp_serial, client):
-    check = recv_check(print_lock, client)
+def run(print_lock, client_socket):
+    check = recv_check(print_lock, client_socket)
 
     if check != "superawesomesecurepassword":
-        client.close()
+        with print_lock:
+            print "Not right password!"
+        client_socket.close()
         return
 
-    client.send("ready\n")
-
-    global motion
-    global sensor
+    client_socket.send("ready\n")
 
     should_continue = True
 
     while should_continue:
         data = recvall(print_lock, client_socket)
 
-        for item.split() in data:
-            if item[1] == 'A':
-                motion.cAllWheelsWrite(item[1:])
-            if item[1] == 'B':
-                motion.cBackLeftWheelWrite(item[1:])
-            if item[1] == 'C':
-                motion.cBackRightWheelWrite(item[1:])
-            if item[1] == 'D':
-                motion.cFrontLeftWheelWrite(item[1:])
-            if item[1] == 'E':
-                motion.cFrontRightWheelWrite(item[1:])
-            if item[1] == 'F':
-                motion.cBucketMotorWrite(item[1:])
-            if item[1] == 'G':
-                motion.cConveryerMotorWrite(item[1:])
-            if item[1] == 'H':
-                motion.cSteeringActWrite(item[1:])
-            if item[1] == 'I':
-                motion.cBucketActWrite(item[1:])
+        for item in data:
+            if len(item) < 1: continue
 
-            if item[1] == 'J':
-                return Sensor.cBackLeftWheelEncoder
-            if item[1] == 'K':
-                return Sensor.cBackRightWheelEncoder
-            if item[1] == 'L':
-                return Sensor.cFrontLeftWheelEncoder
-            if item[1] == 'M':
-                return Sensor.cFrontRightWheelEncoder
-            if item[1] == 'N':
-                return Sensor.cSteeringActSensor
-            if item[1] == 'O':
-                return Sensor.cBucketActSensor
-            if item[1] == 'P':
-                return Sensor.cIRBack
+            with print_lock:
+                print "Processing:", item
 
-            if item[1] == 'Q':
-                return '-'.join(
-                    Sensor.cBackLeftWheelEncoder,
-                    Sensor.cBackRightWheelEncoder,
-                    Sensor.cFrontLeftWheelEncoder,
-                    Sensor.cFrontRightWheelEncoder,
-                    Sensor.cSteeringActSensor,
-                    Sensor.cBucketActSensor,
-                    Sensor.cIRBack
-                )
+            if item[0] == 'A':
+                settings.settings.motion.cAllWheelsWrite(item[1:])
+            if item[0] == 'B':
+                settings.motion.cBackLeftWheelWrite(item[1:])
+            if item[0] == 'C':
+                settings.motion.cBackRightWheelWrite(item[1:])
+            if item[0] == 'D':
+                settings.motion.cFrontLeftWheelWrite(item[1:])
+            if item[0] == 'E':
+                settings.motion.cFrontRightWheelWrite(item[1:])
+            if item[0] == 'F':
+                settings.motion.cBucketMotorWrite(item[1:])
+            if item[0] == 'G':
+                settings.motion.cConveryerMotorWrite(item[1:])
+            if item[0] == 'H':
+                settings.motion.cSteeringActWrite(item[1:])
+            if item[0] == 'I':
+                settings.motion.cBucketActWrite(item[1:])
 
-            if item[1] == 'R':
-                return get_picture(item[1])
+            if item[0] == 'J':
+                client_socket.send(str(settings.sensor.cBackLeftWheelEncoder) + '\n')
+            if item[0] == 'K':
+                client_socket.send(str(settings.sensor.cBackRightWheelEncoder) + '\n')
+            if item[0] == 'L':
+                client_socket.send(str(settings.sensor.cFrontLeftWheelEncoder) + '\n')
+            if item[0] == 'M':
+                client_socket.send(str(settings.sensor.cFrontRightWheelEncoder) + '\n')
+            if item[0] == 'N':
+                client_socket.send(str(settings.sensor.cSteeringActSensor) + '\n')
+            if item[0] == 'O':
+                client_socket.send(str(settings.sensor.cBucketActSensor) + '\n')
+            if item[0] == 'P':
+                client_socket.send(str(settings.sensor.cIRBack) + '\n')
+
+            if item[0] == 'Q':
+                client_socket.send('-'.join([
+                    settings.sensor.cBackLeftWheelEncoder,
+                    settings.sensor.cBackRightWheelEncoder,
+                    settings.sensor.cFrontLeftWheelEncoder,
+                    settings.sensor.cFrontRightWheelEncoder,
+                    settings.sensor.cSteeringActSensor,
+                    settings.sensor.cBucketActSensor,
+                    settings.sensor.cIRBack
+                ]) + '\n')
+
+            if item[0] == 'R':
+                client_socket.send(str(get_picture(item[1])) + '\n')
 
 def get_picture(which_picture):
     return which_picture
 
 def update_sensors(print_lock, aSer):
-    global motion
-    global sensor
-    global arduino_to_write
+    while True:
+        temp = settings.arduino_to_write
+        settings.arduino_to_write = []
 
-    temp = arduino_to_write
-    arduino_to_write = []
+        for item in temp:
+            aSer.write(item + '\n')
+            aSer.flushOutput()
 
-    for item in temp:
-        aSer.write(item + '\n')
-        aSer.flushOutput()
+        settings.sensor.update(print_lock, aSer.readline())
 
-    sensor.update(print_lock, aSer.readline())
-
-    # Sleep for 100 milliseconds
-    time.sleep(.1);
+        # Sleep for 100 milliseconds
+        time.sleep(.5);
 
 def recvall(print_lock, client_socket):
-    data = ""
+    data = "z"
 
     with print_lock:
         print "Recving data!"
@@ -102,10 +104,13 @@ def recvall(print_lock, client_socket):
         packet = client_socket.recv(1024)
         data += packet
 
-    with print_lock:
-        print data.split('\n')
+    data = data[1:] # We need the z so we can check data[-1]
+                    # It will give out of bounce error otherwise.
 
-    return data.split('\n')
+    with print_lock:
+        print data.split('\n')[:-1]
+
+    return data.split('\n')[:-1]
 
 def recv_check(print_lock, client_socket):
     data = ""
@@ -115,12 +120,13 @@ def recv_check(print_lock, client_socket):
 
     packet = client_socket.recv(26)
 
-    print 'Check: ', packet
+    with print_lock:
+        print 'Check: ', packet
 
     return packet
 
-def setupSocket(lock, server_addr, server_socket):
-    with lock:
+def setupSocket(print_lock, server_addr, server_socket):
+    with print_lock:
         print 'Starting server on %s:%s' % server_addr
 
     server_socket.bind(server_addr)

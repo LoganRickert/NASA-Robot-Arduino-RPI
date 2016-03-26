@@ -24,7 +24,8 @@ class Sensor:
         self.cIRBackTime = time.time()
 
     def update(self, print_lock, information):
-        information = information.split('-'):
+        information = information.split('-')
+        print information
 
         if len(information) == 7:
             self.cBackLeftWheelEncoder = information[0]
@@ -33,7 +34,7 @@ class Sensor:
             self.cFrontRightWheelEncoder = information[3]
             self.cSteeringActSensor = information[4]
             self.cBucketActSensor = information[5]
-            self.cIRBack = information[6]
+            self.cIRBack = information[6].split()[0] # Removes \r\n
         else:
             with print_lock:
                 print "Something's gone bad with update!"

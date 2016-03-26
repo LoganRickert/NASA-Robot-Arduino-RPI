@@ -10,12 +10,13 @@ import serial
 import socket
 import time
 
-from threading import lock
+from threading import Lock
 from threading import Thread
 
 import Motion
 import Sensor
 import Server
+import settings
 
 # The width of the pygame window
 WIN_WIDTH = 640
@@ -23,27 +24,23 @@ WIN_HEIGHT = 480
  
 # Server address
 # Host:port
-server_addr = ('', 1337)
+port = int(raw_input('port: '))
+server_addr = ('', port)
 
 def main():
     print_lock = Lock()
 
     socket_lock = Lock()
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    Server.setupSocket(print_lock, server_socket)
+    Server.setupSocket(print_lock, server_addr, server_socket)
 
     rasp_serial = serial.Serial(
-        port='/dev/ttyUSB0',
+        # port='/dev/ttyUSB0', # Linux
+        port='COM7',           # Windows
         baudrate=9600,
     )
 
-    global motion
-    global sensor
-    global arduino_to_write
-
-    motion = Motion.Motion()
-    sensor = Sensor.Sensor()
-    arduino_to_write = []
+    settings.init()
 
     threads = []
 
