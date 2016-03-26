@@ -32,11 +32,11 @@ class Camera:
             # bit depth is the same as that of the display surface.
             self.snapshot = pygame.surface.Surface(self.size, 0, self.display)
 
-    def _update_row(self, rowa, rowb):
-        leny = len(rowa)
+    def _update_row(self, rowb):
+        leny = len(self.pxarrayA)
 
         for y in range(0, leny):
-                col = rowa[y]
+                col = pxarrayA[y]
                 new_val = ((((((col >> 16) & 0xff)*76) + (((col >> 8) & 0xff)*150) + \
                     ((col & 0xff)*29)) >> 8))
 
@@ -52,7 +52,7 @@ class Camera:
         tempSurface = pygame.surface.Surface(self.size, 0, self.display)
         tempSurface = self.camera.get_image(tempSurface)
 
-        pxarrayA = pygame.PixelArray(tempSurface)[0::3, 0::3]
+        self.pxarrayA = pygame.PixelArray(tempSurface)[0::3, 0::3]
         pxarrayB = pygame.PixelArray(self.snapshot)[0::3, 0::3]
 
         self.camera.stop()
@@ -63,14 +63,15 @@ class Camera:
 
         time_start = time.time()
 
-        lenx = len(pxarrayA)
+        lenx = len(self.pxarrayA)
 
-        for x in range(0, lenx):
-            self._update_row(pxarrayA[x], pxarrayB[x])
+        p = Pool(4)
+
+        p.map(self._update_row, pxarrayB[x])
 
         print "Took:", (time.time() - time_start)
 
-        del pxarrayA
+        del self.pxarrayA
         del pxarrayB
         print "Went through:", self.compress(pixels)
 
