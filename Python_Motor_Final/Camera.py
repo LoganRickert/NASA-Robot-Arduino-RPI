@@ -47,13 +47,13 @@ class Camera:
         for x in range(0, 640, 4):
             for y in range(0, 360, 4):
                 wentThrough += 1
-                #col = pxarrayA[x, y]
-                #new_val = ((((((col >> 16) & 0xff)*76) + (((col >> 8) & 0xff)*150) + \
-                #    ((col & 0xff)*29)) >> 8))
+                col = pxarrayA[x, y]
+                new_val = ((((((col >> 16) & 0xff)*76) + (((col >> 8) & 0xff)*150) + \
+                    ((col & 0xff)*29)) >> 8))
 
-                #div = 8
-                #color = new_val / div
-                #pixels.append(color)
+                div = 8
+                color = new_val / div
+                pixels.append(color)
                 pxarrayB[x, y] = pxarrayA[x, y]#(color * div, color * div, color * div)
 
         del pxarrayA
