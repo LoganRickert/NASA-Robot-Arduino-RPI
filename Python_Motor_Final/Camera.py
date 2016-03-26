@@ -42,7 +42,7 @@ class Camera:
 
                 div = 8
                 color = new_val / div
-                pixels.append(color)
+                # pixels.append(color)
                 rowb[y] = (color * div, color * div, color * div)
 
     def get_and_flip(self, camera):
