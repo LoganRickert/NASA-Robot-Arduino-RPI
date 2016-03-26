@@ -37,8 +37,9 @@ def main():
             
             temp = ''.join(recvall(client))
             image = bz2.decompress(binascii.unhexlify(temp))
-            print "sent:", len(binascii.unhexlify(temp))
-            print "comp:", len(image)
+            print "sent:", len(temp)
+            print "comp:", len(binascii.unhexlify(temp))
+            print "pixels:", len(image)
             image = ast.literal_eval(image)
 
             tempSurface = pygame.surface.Surface(size, 0, display)
@@ -47,8 +48,8 @@ def main():
             lenx = len(pxarrayA)
             leny = len(pxarrayA[0])
 
-            for x in range(0, lenx / 4):
-                for y in range(0, leny / 3):
+            for x in range(0, lenx):
+                for y in range(0, leny):
                     color = image[x  * (y + 1)]
                     div = 8
                     pxarrayA[x * 4, y * 3] = (color * div, color * div, color * div)
