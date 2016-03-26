@@ -10,6 +10,12 @@ import Motion
 import Sensor
 
 import bz2
+import binascii
+import ast
+
+size = (640, 360)
+pygame.init()
+display = pygame.display.set_mode(size)
 
 def main():
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -28,8 +34,31 @@ def main():
             print 'Got back:', recvall(client)
 
         if console[0] == 'R':
+            
             temp = ''.join(recvall(client))
-            print bz2.decompress(binascii.unhexlify(temp))
+            image = bz2.decompress(binascii.unhexlify(temp))
+            print "comp:", len(bz2)
+            image = ast.literal_eval(image)
+
+            tempSurface = pygame.surface.Surface(size, 0, display)
+            pxarrayA = pygame.PixelArray(tempSurface)
+
+            lenx = len(pxarrayA)
+            leny = len(pxarrayA[0])
+
+            for x in range(0, lenx / 4):
+                for y in range(0, leny / 3):
+                    color = image[x  * (y + 1)]
+                    div = 8
+                    pxarrayA[x * 4, y * 3] = (color * div, color * div, color * div)
+
+            del pxarrayA
+
+            print "Flipping surface"
+            display.fill((0,0,0))
+            display.blit(tempSurface, (0,0))
+            pygame.display.flip()
+            pygame.event.wait()
 
         if console == 'quit':
             should_continue = False
