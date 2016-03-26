@@ -1,7 +1,6 @@
 import pygame
 import pygame.camera
 from pygame.locals import *
-import cv2
 import bz2
 
 import time

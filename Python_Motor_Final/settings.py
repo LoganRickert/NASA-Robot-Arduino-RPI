@@ -7,7 +7,7 @@ def init():
     global motion
     global sensor
     global arduino_to_write
-    global Camera
+    global camera
 
     motion = Motion.Motion()
     sensor = Sensor.Sensor()

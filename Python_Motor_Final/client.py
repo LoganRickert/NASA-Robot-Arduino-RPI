@@ -11,7 +11,7 @@ import Sensor
 
 def main():
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client.connect(('127.0.0.1', 1338))
+    client.connect(('10.1.117.111', 1339))
     client.send('superawesomesecurepassword\n')
 
     print recvall(client)
@@ -22,11 +22,11 @@ def main():
         console = raw_input('> ')
         client.send(console + '\n')
 
-        if console[0] in 'JKLMNOPQ':
+        if console[0] in 'JKLMNOPQR':
             print 'Got back:', recvall(client)
 
         if console == 'quit':
-            should_continue = false
+            should_continue = False
             client.close()
 
 def recvall(client_socket):
