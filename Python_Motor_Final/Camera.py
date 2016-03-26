@@ -4,7 +4,7 @@ from pygame.locals import *
 import cv2
 import bz2
 
-from multiprocessing import Pool
+import numpy
 
 import time
 
