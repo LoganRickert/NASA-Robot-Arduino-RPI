@@ -37,8 +37,8 @@ def main():
             
             temp = ''.join(recvall(client))
             image = bz2.decompress(binascii.unhexlify(temp))
-            print list(binascii.unhexlify(temp))
-            print "comp:", len(temp)
+            print "sent:", len(binascii.unhexlify(temp))
+            print "comp:", len(image)
             image = ast.literal_eval(image)
 
             tempSurface = pygame.surface.Surface(size, 0, display)

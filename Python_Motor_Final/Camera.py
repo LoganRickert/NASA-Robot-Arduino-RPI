@@ -93,7 +93,6 @@ class Camera:
         # print "C took:", (time.time() - time_start)
         # print 'new lista length:', len(compresseda) * 8
         print "comp:", len(compresseda)
-        print list(compresseda)
         return compresseda
 
 def main():

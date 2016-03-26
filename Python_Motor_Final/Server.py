@@ -77,7 +77,9 @@ def run(print_lock, client_socket):
                 ]) + '\n')
 
             if item[0] == 'R':
-                client_socket.send(binascii.hexlify(get_picture(int(item[1]))) + '\n')
+                to_send = binascii.hexlify(get_picture(int(item[1])))
+                print "sent:", to_send
+                client_socket.send(to_send + '\n')
 
 def get_picture(which_picture):
     return settings.camera.get_image(which_picture)
