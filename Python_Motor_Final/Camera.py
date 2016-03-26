@@ -37,8 +37,11 @@ class Camera:
         tempSurface = pygame.surface.Surface(self.size, 0, self.display)
         tempSurface = self.camera.get_image(tempSurface)
 
-        pxarrayA = pygame.PixelArray(tempSurface)
-        pxarrayB = pygame.PixelArray(self.snapshot)
+        pxarrayA = pygame.PixelArray(tempSurface)[0::3, 0::3]
+        pxarrayB = pygame.PixelArray(self.snapshot)[0::3, 0::3]
+
+        print len(pxarrayA)
+        print len(pxarrayA[0])
 
         self.camera.stop()
 
@@ -48,8 +51,8 @@ class Camera:
 
         time_start = time.time()
 
-        for x in range(0, 640, 3):
-            for y in range(0, 360, 3):
+        for x in range(0, len(pxarrayA)):
+            for y in range(0, len(pxarrayA[x])):
                 wentThrough += 1
                 col = pxarrayA[x, y]
                 new_val = ((((((col >> 16) & 0xff)*76) + (((col >> 8) & 0xff)*150) + \
@@ -82,7 +85,7 @@ def main():
 
     while True:
         camera.get_and_flip(0)
-        pygame.time.wait(500)
+        pygame.time.wait(1000)
 
 if __name__ == "__main__":
     main()
