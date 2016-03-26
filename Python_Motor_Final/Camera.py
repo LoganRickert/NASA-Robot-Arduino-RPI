@@ -9,8 +9,8 @@ import numpy
 import time
 
 def _calc_pixel_color(current_color):
-    new_val = ((((((col >> 16) & 0xff)*76) + (((col >> 8) & 0xff)*150) + \
-        ((col & 0xff)*29)) >> 8))
+    new_val = ((((((current_color >> 16) & 0xff)*76) + (((current_color >> 8) & 0xff)*150) + \
+        ((current_color & 0xff)*29)) >> 8))
 
     div = 8
     color = new_val / div
