@@ -75,7 +75,7 @@ class Camera:
                 new_val = ((((((col >> 16) & 0xff)*76) + (((col >> 8) & 0xff)*150) + \
                     ((col & 0xff)*29)) >> 8))
 
-                div = 8
+                div = 4
                 color = new_val / div
                 pixels.append(color)
                 pxarrayB[x, y] = (color * div, color * div, color * div)
