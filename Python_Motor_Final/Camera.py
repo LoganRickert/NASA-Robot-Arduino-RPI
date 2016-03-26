@@ -58,7 +58,7 @@ class Camera:
         pixels = []
 
         pxarrayA = pygame.PixelArray(tempSurface)[0::4, 0::3]
-        pxarrayB = pygame.PixelArray(self.snapshot)[0::4, 0::3]
+        # pxarrayB = pygame.PixelArray(self.snapshot)[0::4, 0::3]
 
         lenx = len(pxarrayA)
         leny = len(pxarrayA[0])
@@ -74,18 +74,18 @@ class Camera:
                 div = 8
                 color = new_val / div
                 pixels.append(color)
-                pxarrayB[x, y] = (color * div, color * div, color * div)
+                # pxarrayB[x, y] = (color * div, color * div, color * div)
 
         del pxarrayA
-        del pxarrayB
+        # del pxarrayB
 
         # print "Took:", (time.time() - time_start)
 
         self.current_images[camera_number] = [self._compress(pixels), time.time()]
         return self.current_images[camera_number][0]
 
-        self.display.blit(self.snapshot, (0,0))
-        pygame.display.flip()
+        # self.display.blit(self.snapshot, (0,0))
+        # pygame.display.flip()
 
     def _compress(self, pixels):
         time_start = time.time()
@@ -93,6 +93,7 @@ class Camera:
         # print "C took:", (time.time() - time_start)
         # print 'new lista length:', len(compresseda) * 8
         print "comp:", len(compresseda)
+        print list(compresseda)
         return compresseda
 
 def main():
