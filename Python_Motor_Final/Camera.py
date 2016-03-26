@@ -8,6 +8,9 @@ class Camera:
     def __init__(self):
         self.size = (640, 360)
 
+        pygame.init()
+        pygame.camera.init()
+
         # create a display surface. standard pygame stuff
         self.display = pygame.display.set_mode(self.size, 0)
         
