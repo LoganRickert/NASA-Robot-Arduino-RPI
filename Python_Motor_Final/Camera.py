@@ -58,17 +58,63 @@ class Camera:
 
         del pxarrayA
         del pxarrayB
-        print "Went through:", wentThrough#, self.compress(pixels)
+        print "Went through:", wentThrough, self.compress(pixels)
 
         self.display.blit(self.snapshot, (0,0))
         pygame.display.flip()
+
+        def compress(self, pixels):
+        change = []
+
+        delta = pixels[0] + 31
+        change.append(1)
+        change.append(delta)
+        largest = 1
+        largestD = delta
+        lowest = delta
+
+        for item in pixels[1:]:
+            now = pixels[-1] - item + 31
+
+            if now == change[-1]:
+                if change[-2] > 5:
+                    tempb = change[-1]
+                    change.append(1)
+                    change.append(tempb)
+                else:
+                    change[-2] += 1
+
+                if change[-2] > largest: largest = change[-2]
+            else:
+                change.append(1)
+                change.append(now)
+
+                delta = now
+                if delta > largestD: largestD = delta
+                if delta < lowest: lowest = delta
+
+        new_list = []
+
+        numberRange = largestD - lowest
+
+        print 'largest:', largest
+        print 'largestD:', largestD
+        print 'lowest:', lowest
+        print 'delta:', numberRange
+        print 'Change length:', len(change)
+        compresseda = bz2.compress(''.join(str(pixels)), 9)
+        compressedb = bz2.compress(''.join(str(change)), 9)
+        print 'new lista length:', len(compresseda) * 8
+        print 'new listb length:', len(compressedb) * 8
+
+        return len(change)
 
 def main():
     camera = Camera()
 
     while True:
         camera.get_and_flip(0)
-        pygame.time.wait(100)
+        pygame.time.wait(1000)
 
 if __name__ == "__main__":
     main()
