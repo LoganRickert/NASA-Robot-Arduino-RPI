@@ -19,22 +19,22 @@ void Motion::cDriveWheelsWrite(int aRecieved_BLW_Speed, int aRevieved_BRW_Speed,
     cFrontRightWheel.writeMicroseconds(aRecieved_FRW_Speed);
 }
 
-void Motion::cDriveBLWWrite(int aRecieved) {
+void Motion::cDriveBLWWrite(int aRecieved_BLW_Speed) {
     cBackLeftWheelSpeed = aRecieved_BLW_Speed;
     cBackLeftWheel.writeMicroseconds(aRecieved_BLW_Speed);
 }
 
-void Motion::cDriveBRWWrite(int aRecieved) {
+void Motion::cDriveBRWWrite(int aRevieved_BRW_Speed) {
     cBackRightWheelSpeed = aRevieved_BRW_Speed;
     cBackRightWheel.writeMicroseconds(aRevieved_BRW_Speed);
 }
 
-void Motion::cDriveFLWWrite(int aRecieved) {
+void Motion::cDriveFLWWrite(int aRecieved_FLW_Speed) {
     cFrontLeftWheelSpeed = aRecieved_FLW_Speed;
     cFrontLeftWheel.writeMicroseconds(aRecieved_FLW_Speed);
 }
 
-void Motion::cDriveFRWWrite(int aRecieved) {
+void Motion::cDriveFRWWrite(int aRecieved_FRW_Speed) {
     cFrontRightWheelSpeed = aRecieved_FRW_Speed;
     cFrontRightWheel.writeMicroseconds(aRecieved_FRW_Speed);
 }

@@ -27,13 +27,13 @@ int gBucketMotorPin = 0;
 int gConveryerMotorPin = 0;
 
 // Senosr Pins
-int aBackLeftWheelEncoderPin = 0;
-int aBackRightWheelEncoderPin = 0;
-int aFrontLeftWheelEncoderPin = 0;
-int aFrontRightWheelEncoderPin = 0;
-int aSteeringActSensorPin = 0;
-int aBucketActSensorPin = 0;
-int aIRBackPin = 0;
+int aBackLeftWheelEncoderPin = A0;
+int aBackRightWheelEncoderPin = A0;
+int aFrontLeftWheelEncoderPin = A0;
+int aFrontRightWheelEncoderPin = A0;
+int aSteeringActSensorPin = A0;
+int aBucketActSensorPin = A0;
+int aIRBackPin = A0;
 
 Motion motion(
   gBackLeftWheelPin,
@@ -73,7 +73,7 @@ void loop() {
 
   sendUpdateData();
 
-  delay(100);
+  delay(500);
 }
 
 void sendUpdateData() {
@@ -94,7 +94,7 @@ void sendUpdateData() {
 
 // If command == 0, the last command
 // has been processed
-char command;
+char commandType;
 
 // The argument to the command
 int arg;
@@ -112,14 +112,14 @@ bool readyForNewCommand;
  * @breif
  */
 void functionA() {
-  while (!readyForNewCommand && Serial.avaiable() > 0) {
+  while (!readyForNewCommand && Serial.available() > 0) {
     // Make sure the last command
     // is processed before we
     // start anew and overwritting it.
     if (readyForNewCommand == false) {
-      if (getCommandType == 0) {
+      if (commandType == 0) {
         // get the command
-        getCommandType = Serial.read();
+        commandType = Serial.read();
       } else {
         // get next character
         char character = Serial.read();
@@ -128,6 +128,9 @@ void functionA() {
         // end of the current command.
         if (character == '\n') {
           readyForNewCommand = true;
+          Serial.print(commandType);
+          Serial.print('-');
+          Serial.println(arg);
         } else {
           // Shift arg by 1 to make room
           // for the new number.
@@ -143,11 +146,11 @@ void functionA() {
 // main loop.
 void functionB() {
 
-  while (Serial.avaiable() > 0) {
+  while (Serial.available() > 0) {
     // Update input from serial.
     functionA();
 
-    if (ready == true) {
+    if (readyForNewCommand == true) {
       doStuff(commandType, arg);
       readyForNewCommand = false;
       commandType = 0;
