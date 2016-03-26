@@ -8,6 +8,17 @@ from multiprocessing import Pool
 
 import time
 
+def _calc_pixel_color(self, current_color):
+    new_val = ((((((col >> 16) & 0xff)*76) + (((col >> 8) & 0xff)*150) + \
+        ((col & 0xff)*29)) >> 8))
+
+    div = 8
+    color = new_val / div
+
+    return color
+
+_calc_pixel_color = numpy.vectorize(_calc_pixel_color)
+
 class Camera:
     def __init__(self):
         self.size = (640, 360)
@@ -32,18 +43,7 @@ class Camera:
             # bit depth is the same as that of the display surface.
             self.snapshot = pygame.surface.Surface(self.size, 0, self.display)
 
-    def _update_row(self, col):
-        leny = len(self.pxarrayA[0])
-
-        for y in range(0, leny):
-                col = pxarrayA[y]
-                new_val = ((((((col >> 16) & 0xff)*76) + (((col >> 8) & 0xff)*150) + \
-                    ((col & 0xff)*29)) >> 8))
-
-                div = 8
-                color = new_val / div
-                # pixels.append(color)
-                self.pxarrayB[y] = (color * div, color * div, color * div)
+    
 
     def get_and_flip(self, camera):
         #if self.camera.query_image():
@@ -52,8 +52,8 @@ class Camera:
         tempSurface = pygame.surface.Surface(self.size, 0, self.display)
         tempSurface = self.camera.get_image(tempSurface)
 
-        self.pxarrayA = pygame.PixelArray(tempSurface)[0::3, 0::3]
-        self.pxarrayB = pygame.PixelArray(self.snapshot)[0::3, 0::3]
+        pxarrayA = pygame.PixelArray(tempSurface)[0::3, 0::3]
+        # pxarrayB = pygame.PixelArray(self.snapshot)[0::3, 0::3]
 
         self.camera.stop()
 
@@ -63,17 +63,29 @@ class Camera:
 
         time_start = time.time()
 
-        lenx = len(self.pxarrayA)
+        lenx = len(pxarrayA)
+        leny = len(pxarrayA[x])
 
-        p = Pool(4)
+        _calc_pixel_color(pxarrayA)
 
-        p.map(self._update_row, range(0, lenx))
+        self.snapshot = pygame.surface.Surface(self.size, 0, tempSurface)
+
+        # for x in range(0, lenx):
+        #     for y in range(0, leny):
+        #         col = pxarrayA[x, y]
+        #         new_val = ((((((col >> 16) & 0xff)*76) + (((col >> 8) & 0xff)*150) + \
+        #             ((col & 0xff)*29)) >> 8))
+
+        #         div = 8
+        #         color = new_val / div
+        #         pixels.append(color)
+        #         pxarrayB[x, y] = (color * div, color * div, color * div)
 
         print "Took:", (time.time() - time_start)
 
-        del self.pxarrayA
-        del self.pxarrayB
-        print "Went through:", self.compress(pixels)
+        del pxarrayA
+        # del pxarrayB
+        # print "Went through:", self.compress(pixels)
 
         self.display.blit(self.snapshot, (0,0))
         pygame.display.flip()
