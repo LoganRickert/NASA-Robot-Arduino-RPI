@@ -43,8 +43,8 @@ class Camera:
             print "CAMERA OUT OF BOUNCE"
             return 0
 
-        if time.time() - self.current_images[camera_number][1] < 1:
-            return self.current_images[camera_number][0]
+        # if time.time() - self.current_images[camera_number][1] < 1:
+            # return self.current_images[camera_number][0]
 
         self.cameras[camera_number].start()
         
@@ -57,16 +57,16 @@ class Camera:
 
         pixels = []
 
-        pxarrayA = pygame.PixelArray(tempSurface)[0::4, 0::3]
-        pxarrayB = pygame.PixelArray(self.snapshot)[0::4, 0::3]
+        pxarrayA = pygame.PixelArray(tempSurface)#[0::4, 0::3]
+        pxarrayB = pygame.PixelArray(self.snapshot)#[0::4, 0::3]
 
         lenx = len(pxarrayA)
         leny = len(pxarrayA[0])
 
         # _calc_pixel_color(pxarrayA)
 
-        for x in range(0, lenx):
-            for y in range(0, leny):
+        for x in range(0, lenx, 4):
+            for y in range(0, leny, 3):
                 col = pxarrayA[x, y]
                 new_val = ((((((col >> 16) & 0xff)*76) + (((col >> 8) & 0xff)*150) + \
                     ((col & 0xff)*29)) >> 8))
@@ -82,10 +82,11 @@ class Camera:
         # print "Took:", (time.time() - time_start)
 
         self.current_images[camera_number] = [self._compress(pixels), time.time()]
-        return self.current_images[camera_number][0]
-
+        
         self.display.blit(self.snapshot, (0,0))
         pygame.display.flip()
+
+        return self.current_images[camera_number][0]
 
     def _compress(self, pixels):
         time_start = time.time()
@@ -99,7 +100,7 @@ def main():
     camera = Camera()
 
     while True:
-        camera.get_and_flip(0)
+        camera.get_image(0)
         pygame.time.wait(1000)
 
 if __name__ == "__main__":

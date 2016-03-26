@@ -13,7 +13,7 @@ import bz2
 import binascii
 import ast
 
-size = (640, 360)
+size = (160, 120)
 pygame.init()
 display = pygame.display.set_mode(size)
 
@@ -52,7 +52,7 @@ def main():
                 for y in range(0, leny):
                     color = image[x  * (y + 1)]
                     div = 8
-                    pxarrayA[x * 4, y * 3] = (color * div, color * div, color * div)
+                    pxarrayA[x, y] = (color * div, color * div, color * div)
 
             del pxarrayA
 
