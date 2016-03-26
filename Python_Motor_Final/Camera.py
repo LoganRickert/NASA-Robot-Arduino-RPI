@@ -47,12 +47,13 @@ class Camera:
 
     def get_and_flip(self, camera):
         #if self.camera.query_image():
+        time_start = time.time()
+
         self.camera.start()
         
         tempSurface = pygame.surface.Surface(self.size, 0, self.display)
         tempSurface = self.camera.get_image(tempSurface)
 
-        pxarrayA = pygame.PixelArray(tempSurface)[0::3, 0::3]
         # pxarrayB = pygame.PixelArray(self.snapshot)[0::3, 0::3]
 
         self.camera.stop()
@@ -61,14 +62,13 @@ class Camera:
 
         pixels = []
 
-        time_start = time.time()
 
         lenx = len(pxarrayA)
         leny = len(pxarrayA[0])
 
         _calc_pixel_color(pxarrayA)
 
-        self.snapshot = pygame.surface.Surface(self.size, 0, tempSurface)
+        pxarrayA = pygame.PixelArray(tempSurface)[0::3, 0::3]
 
         # for x in range(0, lenx):
         #     for y in range(0, leny):
@@ -81,9 +81,12 @@ class Camera:
         #         pixels.append(color)
         #         pxarrayB[x, y] = (color * div, color * div, color * div)
 
+        del pxarrayA
+        
+        self.snapshot = pygame.surface.Surface(self.size, 0, tempSurface)
+
         print "Took:", (time.time() - time_start)
 
-        del pxarrayA
         # del pxarrayB
         # print "Went through:", self.compress(pixels)
 
