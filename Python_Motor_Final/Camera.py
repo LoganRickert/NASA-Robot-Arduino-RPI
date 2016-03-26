@@ -39,7 +39,7 @@ class Camera:
         #if self.camera.query_image():
         # time_start = time.time()
 
-        if camera_number > len(self.cameras):
+        if camera_number >= len(self.cameras):
             print "CAMERA OUT OF BOUNCE"
             return 0
 
