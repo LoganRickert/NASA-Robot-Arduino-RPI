@@ -64,50 +64,50 @@ class Camera:
         pygame.display.flip()
 
         def compress(self, pixels):
-        change = []
+            change = []
 
-        delta = pixels[0] + 31
-        change.append(1)
-        change.append(delta)
-        largest = 1
-        largestD = delta
-        lowest = delta
+            delta = pixels[0] + 31
+            change.append(1)
+            change.append(delta)
+            largest = 1
+            largestD = delta
+            lowest = delta
 
-        for item in pixels[1:]:
-            now = pixels[-1] - item + 31
+            for item in pixels[1:]:
+                now = pixels[-1] - item + 31
 
-            if now == change[-1]:
-                if change[-2] > 5:
-                    tempb = change[-1]
-                    change.append(1)
-                    change.append(tempb)
+                if now == change[-1]:
+                    if change[-2] > 5:
+                        tempb = change[-1]
+                        change.append(1)
+                        change.append(tempb)
+                    else:
+                        change[-2] += 1
+
+                    if change[-2] > largest: largest = change[-2]
                 else:
-                    change[-2] += 1
+                    change.append(1)
+                    change.append(now)
 
-                if change[-2] > largest: largest = change[-2]
-            else:
-                change.append(1)
-                change.append(now)
+                    delta = now
+                    if delta > largestD: largestD = delta
+                    if delta < lowest: lowest = delta
 
-                delta = now
-                if delta > largestD: largestD = delta
-                if delta < lowest: lowest = delta
+            new_list = []
 
-        new_list = []
+            numberRange = largestD - lowest
 
-        numberRange = largestD - lowest
+            print 'largest:', largest
+            print 'largestD:', largestD
+            print 'lowest:', lowest
+            print 'delta:', numberRange
+            print 'Change length:', len(change)
+            compresseda = bz2.compress(''.join(str(pixels)), 9)
+            compressedb = bz2.compress(''.join(str(change)), 9)
+            print 'new lista length:', len(compresseda) * 8
+            print 'new listb length:', len(compressedb) * 8
 
-        print 'largest:', largest
-        print 'largestD:', largestD
-        print 'lowest:', lowest
-        print 'delta:', numberRange
-        print 'Change length:', len(change)
-        compresseda = bz2.compress(''.join(str(pixels)), 9)
-        compressedb = bz2.compress(''.join(str(change)), 9)
-        print 'new lista length:', len(compresseda) * 8
-        print 'new listb length:', len(compressedb) * 8
-
-        return len(change)
+            return len(change)
 
 def main():
     camera = Camera()
