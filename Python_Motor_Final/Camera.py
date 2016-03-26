@@ -92,7 +92,7 @@ class Camera:
         compresseda = bz2.compress(''.join(str(pixels)), 9)
         # print "C took:", (time.time() - time_start)
         # print 'new lista length:', len(compresseda) * 8
-        return compresseda
+        return compresseda.encode('ascii')
 
 def main():
     camera = Camera()

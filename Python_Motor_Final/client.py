@@ -9,6 +9,8 @@ from pygame.locals import *
 import Motion
 import Sensor
 
+import bz2
+
 def main():
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client.connect(('10.1.117.111', 1338))
@@ -22,8 +24,12 @@ def main():
         console = raw_input('> ')
         client.send(console + '\n')
 
-        if console[0] in 'JKLMNOPQR':
+        if console[0] in 'JKLMNOPQ':
             print 'Got back:', recvall(client)
+
+        if console[0] == 'R':
+            temp = ''.join(recvall(client))
+            print bz2.decompress(temp.decode('ascii'))
 
         if console == 'quit':
             should_continue = False
