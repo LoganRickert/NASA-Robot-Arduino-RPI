@@ -67,7 +67,7 @@ class Camera:
         compresseda = bz2.compress(''.join(str(pixels)), 9)
         print 'new lista length:', len(compresseda) * 8
         
-        return len(change)
+        return len(compresseda)
 
 def main():
     camera = Camera()
