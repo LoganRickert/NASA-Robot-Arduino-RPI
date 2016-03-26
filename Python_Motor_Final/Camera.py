@@ -19,7 +19,7 @@ class Camera:
             self.total_cameras = 0
             print "NO CAMERAS WERE DETECTED!"
         else:
-            self.camera = pygame.camera.Camera(self.clist[1], self.size)
+            self.camera = pygame.camera.Camera(self.clist[0], self.size)
             self.camera.start()
 
             # create a surface to capture to.  for performance purposes
@@ -28,19 +28,41 @@ class Camera:
 
     def get_and_flip(self, camera):
         if self.camera.query_image():
+            print "query_image"
             tempSurface = pygame.surface.Surface(self.size, 0, self.display)
             tempSurface = self.camera.get_image(tempSurface)
 
-            # Process
+        pxarrayA = pygame.PixelArray(tempSurface)
+        pxarrayB = pygame.PixelArray(self.snapshot)
+
+        wentThrough = 0
+
+        pixels = []
+
+        for x in range(0, 640, 4):
+            for y in range(0, 360, 4):
+                wentThrough += 1
+                col = pxarrayA[x, y]
+                new_val = ((((((col >> 16) & 0xff)*76) + (((col >> 8) & 0xff)*150) + \
+                    ((col & 0xff)*29)) >> 8))
+
+                div = 8
+                color = new_val / div
+                pixels.append(color)
+                pxarrayB[x, y] = (color * div, color * div, color * div)
+
+        del pxarrayA
+        del pxarrayB
+        print "Went through:", wentThrough, self.compress(pixels)
 
         self.display.blit(self.snapshot, (0,0))
         pygame.display.flip()
 
-def main(self):
+def main():
     camera = Camera()
 
     while True:
-        camera.get_and_flip()
+        camera.get_and_flip(0)
         pygame.time.wait(100)
 
 if __name__ == "__main__":
