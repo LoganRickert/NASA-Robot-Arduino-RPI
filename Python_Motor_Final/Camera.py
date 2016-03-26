@@ -62,13 +62,13 @@ class Camera:
 
         pixels = []
 
+        pxarrayA = pygame.PixelArray(tempSurface)[0::3, 0::3]
 
         lenx = len(pxarrayA)
         leny = len(pxarrayA[0])
 
         _calc_pixel_color(pxarrayA)
 
-        pxarrayA = pygame.PixelArray(tempSurface)[0::3, 0::3]
 
         # for x in range(0, lenx):
         #     for y in range(0, leny):
