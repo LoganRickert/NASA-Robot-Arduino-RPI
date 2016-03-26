@@ -54,7 +54,7 @@ class Camera:
                 div = 8
                 color = new_val / div
                 pixels.append(color)
-                pxarrayB[x, y] = pxarrayA[x, y]#(color * div, color * div, color * div)
+                pxarrayB[x, y] = (color * div, color * div, color * div)
 
         del pxarrayA
         del pxarrayB
@@ -68,7 +68,7 @@ def main():
 
     while True:
         camera.get_and_flip(0)
-        pygame.time.wait(500)
+        pygame.time.wait(100)
 
 if __name__ == "__main__":
     main()
