@@ -64,7 +64,7 @@ class Camera:
         time_start = time.time()
 
         lenx = len(pxarrayA)
-        leny = len(pxarrayA[x])
+        leny = len(pxarrayA[0])
 
         _calc_pixel_color(pxarrayA)
 
