@@ -67,7 +67,7 @@ class Camera:
 
         p = Pool(4)
 
-        p.map(self._update_row, pxarrayB[x])
+        p.map(self._update_row, pxarrayB)
 
         print "Took:", (time.time() - time_start)
 
