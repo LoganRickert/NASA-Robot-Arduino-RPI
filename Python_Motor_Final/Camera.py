@@ -85,7 +85,7 @@ class Camera:
 
         print "Took:", (time.time() - time_start)
 
-        # print "Went through:", self.compress(pixels)
+        print "Went through:", self.compress(pixels)
 
         self.display.blit(self.snapshot, (0,0))
         pygame.display.flip()
