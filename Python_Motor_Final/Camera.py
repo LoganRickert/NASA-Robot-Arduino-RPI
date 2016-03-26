@@ -4,6 +4,8 @@ from pygame.locals import *
 import cv2
 import bz2
 
+from multiprocessing import Pool
+
 import time
 
 class Camera:
@@ -30,6 +32,19 @@ class Camera:
             # bit depth is the same as that of the display surface.
             self.snapshot = pygame.surface.Surface(self.size, 0, self.display)
 
+    def _update_row(self, rowa, rowb):
+        leny = len(row)
+
+        for y in range(0, leny):
+                col = pxarrayA[y]
+                new_val = ((((((col >> 16) & 0xff)*76) + (((col >> 8) & 0xff)*150) + \
+                    ((col & 0xff)*29)) >> 8))
+
+                div = 8
+                color = new_val / div
+                pixels.append(color)
+                pxarrayB[y] = (color * div, color * div, color * div)
+
     def get_and_flip(self, camera):
         #if self.camera.query_image():
         self.camera.start()
@@ -40,9 +55,6 @@ class Camera:
         pxarrayA = pygame.PixelArray(tempSurface)[0::3, 0::3]
         pxarrayB = pygame.PixelArray(self.snapshot)[0::3, 0::3]
 
-        print len(pxarrayA)
-        print len(pxarrayA[0])
-
         self.camera.stop()
 
         wentThrough = 0
@@ -51,23 +63,16 @@ class Camera:
 
         time_start = time.time()
 
-        for x in range(0, len(pxarrayA)):
-            for y in range(0, len(pxarrayA[x])):
-                wentThrough += 1
-                col = pxarrayA[x, y]
-                new_val = ((((((col >> 16) & 0xff)*76) + (((col >> 8) & 0xff)*150) + \
-                    ((col & 0xff)*29)) >> 8))
+        lenx = len(pxarrayA)
 
-                div = 8
-                color = new_val / div
-                pixels.append(color)
-                pxarrayB[x, y] = (color * div, color * div, color * div)
+        for x in range(0, lenx):
+            self._update_row(pxarrayA[x], pxarrayB[x])
 
         print "Took:", (time.time() - time_start)
 
         del pxarrayA
         del pxarrayB
-        print "Went through:", wentThrough, self.compress(pixels)
+        print "Went through:", self.compress(pixels)
 
         self.display.blit(self.snapshot, (0,0))
         pygame.display.flip()
