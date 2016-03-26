@@ -4,20 +4,7 @@ from pygame.locals import *
 import cv2
 import bz2
 
-import numpy
-
 import time
-
-def _calc_pixel_color(current_color):
-    new_val = ((((((current_color >> 16) & 0xff)*76) + (((current_color >> 8) & 0xff)*150) + \
-        ((current_color & 0xff)*29)) >> 8))
-
-    div = 8
-    color = new_val / div
-
-    return color
-
-_calc_pixel_color = numpy.vectorize(_calc_pixel_color)
 
 class Camera:
     def __init__(self):
@@ -31,38 +18,48 @@ class Camera:
         
         # this is the same as what we saw before
         self.clist = pygame.camera.list_cameras()
-        print "Camera list:", self.clist
+        # print "Camera list:", self.clist
+
+        self.cameras = []
+        self.current_images = []
 
         if not self.clist:
             self.total_cameras = 0
             print "NO CAMERAS WERE DETECTED!"
         else:
-            self.camera = pygame.camera.Camera(self.clist[0], self.size)
+            for camera in self.clist:
+                self.cameras.append(pygame.camera.Camera(camera, self.size))
+                self.current_images.append(["", time.time()])
 
             # create a surface to capture to.  for performance purposes
             # bit depth is the same as that of the display surface.
             self.snapshot = pygame.surface.Surface(self.size, 0, self.display)
 
-    
 
-    def get_and_flip(self, camera):
+    def get_image(self, camera_number):
         #if self.camera.query_image():
-        time_start = time.time()
+        # time_start = time.time()
 
-        self.camera.start()
+        if camera_number > len(self.cameras):
+            print "CAMERA OUT OF BOUNCE"
+            return 0
+
+        if time.time() - self.current_images[camera_number][1] < 1:
+            return self.current_images[camera_number][0]
+
+        self.cameras[camera_number].start()
         
         tempSurface = pygame.surface.Surface(self.size, 0, self.display)
-        tempSurface = self.camera.get_image(tempSurface)
+        tempSurface = self.cameras[camera_number].get_image(tempSurface)
 
-
-        self.camera.stop()
+        self.cameras[camera_number].stop()
 
         wentThrough = 0
 
         pixels = []
 
         pxarrayA = pygame.PixelArray(tempSurface)[0::4, 0::3]
-        pxarrayB = pygame.PixelArray(self.snapshot)[0::4, 0::3]
+        # pxarrayB = pygame.PixelArray(self.snapshot)[0::4, 0::3]
 
         lenx = len(pxarrayA)
         leny = len(pxarrayA[0])
@@ -78,24 +75,24 @@ class Camera:
                 div = 8
                 color = new_val / div
                 pixels.append(color)
-                pxarrayB[x, y] = (color * div, color * div, color * div)
+                # pxarrayB[x, y] = (color * div, color * div, color * div)
 
         del pxarrayA
-        del pxarrayB
+        # del pxarrayB
 
-        print "Took:", (time.time() - time_start)
+        # print "Took:", (time.time() - time_start)
 
-        print "Went through:", self.compress(pixels)
+        self.current_images[camera_number] = [self._compress(pixels), time.time()]
+        return self.current_images[camera_number][0]
 
-        self.display.blit(self.snapshot, (0,0))
-        pygame.display.flip()
+        # self.display.blit(self.snapshot, (0,0))
+        # pygame.display.flip()
 
-    def compress(self, pixels):
+    def _compress(self, pixels):
         time_start = time.time()
         compresseda = bz2.compress(''.join(str(pixels)), 9)
-        print "C took:", (time.time() - time_start)
-        print 'new lista length:', len(compresseda) * 8
-        
+        # print "C took:", (time.time() - time_start)
+        # print 'new lista length:', len(compresseda) * 8
         return len(compresseda)
 
 def main():

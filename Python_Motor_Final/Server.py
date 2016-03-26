@@ -75,10 +75,10 @@ def run(print_lock, client_socket):
                 ]) + '\n')
 
             if item[0] == 'R':
-                client_socket.send(str(get_picture(item[1])) + '\n')
+                client_socket.send(str(get_picture(int(item[1]))) + '\n')
 
 def get_picture(which_picture):
-    return which_picture
+    return settings.camera.get_image(which_picture)
 
 def update_sensors(print_lock, aSer):
     while True:
