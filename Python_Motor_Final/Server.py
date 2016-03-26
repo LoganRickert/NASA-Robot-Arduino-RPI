@@ -78,7 +78,7 @@ def run(print_lock, client_socket):
 
             if item[0] == 'R':
                 to_send = binascii.hexlify(get_picture(int(item[1])))
-                print "sent:", to_send
+                print "sent:", len(to_send)
                 client_socket.send(to_send + '\n')
 
 def get_picture(which_picture):
