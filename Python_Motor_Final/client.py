@@ -13,7 +13,7 @@ import bz2
 
 def main():
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client.connect(('10.1.117.111', 1338))
+    client.connect(('10.1.117.111', 1339))
     client.send('superawesomesecurepassword\n')
 
     print recvall(client)
@@ -29,7 +29,7 @@ def main():
 
         if console[0] == 'R':
             temp = ''.join(recvall(client))
-            print bz2.decompress(temp.decode('unicode'))
+            print bz2.decompress(temp.decode('utf-8'))
 
         if console == 'quit':
             should_continue = False
