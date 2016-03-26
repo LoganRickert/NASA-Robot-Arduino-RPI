@@ -32,8 +32,8 @@ class Camera:
             # bit depth is the same as that of the display surface.
             self.snapshot = pygame.surface.Surface(self.size, 0, self.display)
 
-    def _update_row(self, rowb):
-        leny = len(self.pxarrayA)
+    def _update_row(self, col):
+        leny = len(self.pxarrayA[0])
 
         for y in range(0, leny):
                 col = pxarrayA[y]
@@ -43,7 +43,7 @@ class Camera:
                 div = 8
                 color = new_val / div
                 # pixels.append(color)
-                rowb[y] = (color * div, color * div, color * div)
+                self.pxarrayB[y] = (color * div, color * div, color * div)
 
     def get_and_flip(self, camera):
         #if self.camera.query_image():
@@ -53,7 +53,7 @@ class Camera:
         tempSurface = self.camera.get_image(tempSurface)
 
         self.pxarrayA = pygame.PixelArray(tempSurface)[0::3, 0::3]
-        pxarrayB = pygame.PixelArray(self.snapshot)[0::3, 0::3]
+        self.pxarrayB = pygame.PixelArray(self.snapshot)[0::3, 0::3]
 
         self.camera.stop()
 
@@ -67,12 +67,12 @@ class Camera:
 
         p = Pool(4)
 
-        p.map(self._update_row, pxarrayB)
+        p.map(self._update_row, range(0, lenx))
 
         print "Took:", (time.time() - time_start)
 
         del self.pxarrayA
-        del pxarrayB
+        del self.pxarrayB
         print "Went through:", self.compress(pixels)
 
         self.display.blit(self.snapshot, (0,0))
