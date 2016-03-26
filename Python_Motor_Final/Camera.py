@@ -61,8 +61,8 @@ class Camera:
 
         pixels = []
 
-        pxarrayA = pygame.PixelArray(tempSurface)[0::4, 0::4]
-        pxarrayB = pygame.PixelArray(self.snapshot)[0::4, 0::4]
+        pxarrayA = pygame.PixelArray(tempSurface)[0::4, 0::3]
+        pxarrayB = pygame.PixelArray(self.snapshot)[0::4, 0::3]
 
         lenx = len(pxarrayA)
         leny = len(pxarrayA[0])
@@ -75,7 +75,7 @@ class Camera:
                 new_val = ((((((col >> 16) & 0xff)*76) + (((col >> 8) & 0xff)*150) + \
                     ((col & 0xff)*29)) >> 8))
 
-                div = 4
+                div = 8
                 color = new_val / div
                 pixels.append(color)
                 pxarrayB[x, y] = (color * div, color * div, color * div)
