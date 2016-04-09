@@ -24,7 +24,7 @@ snapshot = pygame.surface.Surface(size, 0, display)
 
 def main():
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client.connect(('10.1.117.111', 1338))
+    client.connect(('10.1.117.111', 1388))
     client.send('superawesomesecurepassword\n')
 
     print recvall(client)

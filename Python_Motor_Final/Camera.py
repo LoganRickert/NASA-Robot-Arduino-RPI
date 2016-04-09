@@ -62,7 +62,6 @@ class Camera:
     
     # convert color --- magic make it a 8 bit black and white pixel
     def color_convert(self, col):
-       
         # shift the hexidecimal numbers around 
         new_val = ((((((col >> 16) & 0xff)*76) + (((col >> 8) & 0xff)*150) + \
                     ((col & 0xff)*29)) >> 8))
@@ -127,25 +126,25 @@ class Camera:
         # to the length of the array containing arrays by the scale (current 3)
         for x in range(0, lenx, x_scale):
             current_color = [] #<-- ignor for now
-    
-        # for each pixel in arrays inside of array containing array
-        for y in range(0, leny, y_scale):
-
-        # fill in the pixelArray A[x,y]
-                col = pxarrayA[x, y]
-
-        # magic (same as magic function)
-                new_val = ((((((col >> 16) & 0xff)*76) + (((col >> 8) & 0xff)*150) + \
-                    ((col & 0xff)*29)) >> 8))
-
-                div = 8
-                color = new_val / div
         
-        # appends color to pixels array (the array we send)
-                pixels.append(color)
+            # for each pixel in arrays inside of array containing array
+            for y in range(0, leny, y_scale):
 
-        # copys the new color part onto this display
-                pxarrayB[x, y] = (color * div, color * div, color * div)
+                    # fill in the pixelArray A[x,y]
+                    col = pxarrayA[x, y]
+
+                    # magic (same as magic function)
+                    new_val = ((((((col >> 16) & 0xff)*76) + (((col >> 8) & 0xff)*150) + \
+                        ((col & 0xff)*29)) >> 8))
+
+                    div = 8
+                    color = new_val / div
+            
+                    # appends color to pixels array (the array we send)
+                    pixels.append(color)
+
+                    # copys the new color part onto this display
+                    pxarrayB[x, y] = (color * div, color * div, color * div)
 
         # delete
         del pxarrayA
