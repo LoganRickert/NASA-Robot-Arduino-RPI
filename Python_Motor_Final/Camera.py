@@ -46,18 +46,18 @@ class Camera:
             self.total_cameras = 0
             print "NO CAMERAS WERE DETECTED!"
        
-    else:
-        # for each camera
-        for camera in self.clist:
-            # append camera objects to camera list
-            self.cameras.append(pygame.camera.Camera(camera, self.size))
-            # append immage and when it was taken
-            self.current_images.append(["", time.time()])
+        else:
+            # for each camera
+            for camera in self.clist:
+                # append camera objects to camera list
+                self.cameras.append(pygame.camera.Camera(camera, self.size))
+                # append immage and when it was taken
+                self.current_images.append(["", time.time()])
 
-            # create a surface to capture to.  for performance purposes
-            # bit depth is the same as that of the display surface.
-            # create the surface once, rather than each time we take an image
-            self.snapshot = pygame.surface.Surface(self.size, 0, self.display)
+                # create a surface to capture to.  for performance purposes
+                # bit depth is the same as that of the display surface.
+                # create the surface once, rather than each time we take an image
+                self.snapshot = pygame.surface.Surface(self.size, 0, self.display)
 
     
     # convert color --- magic make it a 8 bit black and white pixel
