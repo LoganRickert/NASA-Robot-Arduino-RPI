@@ -17,14 +17,14 @@ Use case: just an in import file to create these objects
 */ 
 
 // Motion Pins
-int gBackLeftWheelPin = 0;
-int gBackRightWheelPin = 0;
-int gFrontLeftWheelPin = 0;
-int gFrontRightWheelPin = 0;
-int gSteeringActPin = 0;
-int gBucketActPin = 0;
-int gBucketMotorPin = 0;
-int gConveryerMotorPin = 0;
+int gBackLeftWheelPin = 49;
+int gBackRightWheelPin = 47;
+int gFrontLeftWheelPin = 52;
+int gFrontRightWheelPin = 50;
+int gSteeringActPin = 40;
+int gBucketActPin = 38;
+int gBucketMotorPin = 42;
+int gConveryerMotorPin = 44;
 
 // Senosr Pins
 int aBackLeftWheelEncoderPin = A0;
@@ -35,40 +35,42 @@ int aSteeringActSensorPin = A0;
 int aBucketActSensorPin = A0;
 int aIRBackPin = A0;
 
-Motion motion(
-  gBackLeftWheelPin,
-  gBackRightWheelPin,
-  gFrontLeftWheelPin,
-  gFrontRightWheelPin,
-  gSteeringActPin,
-  gBucketActPin,
-  gBucketMotorPin,
-  gConveryerMotorPin
-);
-
-Sensor sensor(
-  aBackLeftWheelEncoderPin,
-  aBackRightWheelEncoderPin,
-  aFrontLeftWheelEncoderPin,
-  aFrontRightWheelEncoderPin,
-  aSteeringActSensorPin,
-  aBucketActSensorPin,
-  aIRBackPin
-);
+Motion *motion;
+Sensor *sensor;
 
 void setup() {
   // Begin serial connections
   Serial.begin(9600);
 
   // Create motion object
+  motion = new Motion(
+    gBackLeftWheelPin,
+    gBackRightWheelPin,
+    gFrontLeftWheelPin,
+    gFrontRightWheelPin,
+    gSteeringActPin,
+    gBucketActPin,
+    gBucketMotorPin,
+    gConveryerMotorPin
+  );
 
   // Create sensor object
+  sensor = new Sensor(
+    aBackLeftWheelEncoderPin,
+    aBackRightWheelEncoderPin,
+    aFrontLeftWheelEncoderPin,
+    aFrontRightWheelEncoderPin,
+    aSteeringActSensorPin,
+    aBucketActSensorPin,
+    aIRBackPin
+  );
 }
 
 void loop() {
   // Check if we have gotten
   // a new command. If so,
   // process it.
+  
   functionB();
 
   sendUpdateData();
@@ -77,19 +79,19 @@ void loop() {
 }
 
 void sendUpdateData() {
-  Serial.print(sensor.getBackLeftWheelEncoder());
+  Serial.print(sensor->getBackLeftWheelEncoder());
   Serial.print('-');
-  Serial.print(sensor.getBackRightWheelEncoder());
+  Serial.print(sensor->getBackRightWheelEncoder());
   Serial.print('-');
-  Serial.print(sensor.getFrontLeftWheelEncoder());
+  Serial.print(sensor->getFrontLeftWheelEncoder());
   Serial.print('-');
-  Serial.print(sensor.getFrontRightWheelEncoder());
+  Serial.print(sensor->getFrontRightWheelEncoder());
   Serial.print('-');
-  Serial.print(sensor.getSteeringActSensor());
+  Serial.print(sensor->getSteeringActSensor());
   Serial.print('-');
-  Serial.print(sensor.getBucketActSensor());
+  Serial.print(sensor->getBucketActSensor());
   Serial.print('-');
-  Serial.println(sensor.getIRBack());
+  Serial.println(sensor->getIRBack());
 }
 
 // If command == 0, the last command
@@ -162,59 +164,59 @@ void functionB() {
 void doStuff(char command, int arg) {
   switch (command) {
     case 'A':
-      motion.cDriveWheelsWrite(arg);
+      motion->cDriveWheelsWrite(arg);
       break;
     case 'B':
-      motion.cDriveBLWWrite(arg);
+      motion->cDriveBLWWrite(arg);
       break;
     case 'C':
-      motion.cDriveBRWWrite(arg);
+      motion->cDriveBRWWrite(arg);
       break;
     case 'D':
-      motion.cDriveFLWWrite(arg);
+      motion->cDriveFLWWrite(arg);
       break;
     case 'E':
-      motion.cDriveFRWWrite(arg);
+      motion->cDriveFRWWrite(arg);
       break;
     case 'F':
-      motion.cDriveBucketWrite(arg);
+      motion->cDriveBucketWrite(arg);
       break;
     case 'G':
-      motion.cDriveConveyerWrite(arg);
+      motion->cDriveConveyerWrite(arg);
       break;
     case 'H':
-      motion.cMoveSteeringWrite(arg);
+      motion->cMoveSteeringWrite(arg);
       break;
     case 'I':
-      motion.cMoveBucketsWrite(arg);
+      motion->cMoveBucketsWrite(arg);
       break;
     case 'J':
       Serial.print('J');
-      Serial.println(sensor.getBackLeftWheelEncoder());
+      Serial.println(sensor->getBackLeftWheelEncoder());
       break;
     case 'K':
       Serial.print('K');
-      Serial.println(sensor.getBackRightWheelEncoder());
+      Serial.println(sensor->getBackRightWheelEncoder());
       break;
     case 'L':
       Serial.print('L');
-      Serial.println(sensor.getFrontLeftWheelEncoder());
+      Serial.println(sensor->getFrontLeftWheelEncoder());
       break;
     case 'M':
       Serial.print('M');
-      Serial.println(sensor.getFrontRightWheelEncoder());
+      Serial.println(sensor->getFrontRightWheelEncoder());
       break;
     case 'N':
       Serial.print('N');
-      Serial.println(sensor.getSteeringActSensor());
+      Serial.println(sensor->getSteeringActSensor());
       break;
     case 'O':
       Serial.print('O');
-      Serial.println(sensor.getBucketActSensor());
+      Serial.println(sensor->getBucketActSensor());
       break;
     case 'P':
       Serial.print('P');
-      Serial.println(sensor.getIRBack());
+      Serial.println(sensor->getIRBack());
       break;
   }
 }
