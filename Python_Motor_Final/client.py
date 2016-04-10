@@ -24,13 +24,14 @@ snapshot = pygame.surface.Surface(size, 0, display)
 
 def main():
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client.connect(('10.1.117.111', 1388))
+    client.connect(('10.1.117.111', 1338))
     client.send('superawesomesecurepassword\n')
 
     print recvall(client)
 
     should_continue = True
 
+    """
     while should_continue:
         current = time.time()
         client.send('R0\n')
@@ -75,7 +76,8 @@ def main():
         # pygame.event.wait()
         print "Done                     +", time.time() - current
         print "Done."
-
+    """
+    
     while should_continue:
         console = raw_input('> ')
         client.send(console + '\n')
