@@ -165,7 +165,7 @@ def main():
   last_right_raw = 0
 
   client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-  client.connect(('10.1.105.251', 1339))
+  client.connect(('10.1.117.111', 1338))
   client.send('superawesomesecurepassword\n')
 
   print recvall(client)
@@ -208,7 +208,7 @@ def main():
       elif event.type == JOYBUTTONDOWN:
           if event.button == 2:
               # x button
-              client.send('G' + '1600' + '\n')
+              client.send('G' + '7' + '\n')
           elif event.button == 4:
               is_left_button = True
           elif event.button == 5:
@@ -216,7 +216,7 @@ def main():
       elif event.type == JOYBUTTONUP:
           if event.button == 2:
               # x button
-              client.send('G' + '1500' + '\n')
+              client.send('G' + '5' + '\n')
           elif event.button == 4:
               is_left_button = False
           elif event.button == 5:
@@ -234,38 +234,37 @@ def main():
         #print event.axis
         if event.axis == 1:
           last_left_raw = event.value
-          if not is_left_button:
-              speed = getValueFromController(last_left_raw, trigger_value, 20, True)
-              value1 = speed * 25 + 1225
-              if last_left != value1:
-                  client.send('A' + str(value1) + '\n')
-                  last_left = value1
-                  print 'left:', value1
-          else:
+          if is_left_button:
               buckets_speed = getValueFromController(last_left_raw, trigger_value, 20, True)
-              value1 = buckets_speed * 25 + 1225
+              value1 = buckets_speed
               if last_left != value1:
                   client.send('F' + str(value1) + '\n')
                   last_left = value1
                   print 'left_buckets:', value1
+          else:
+              speed = getValueFromController(last_left_raw, trigger_value, 20, True)
+              value1 = speed
+              if last_left != value1:
+                  client.send('A' + str(value1) + '\n')
+                  last_left = value1
+                  print 'left:', value1
 
         if event.axis == 4:
           last_right_raw = event.value
           if is_right_button:
-              pass
-              #turning = getValueFromController(event.value, trigger_value, 20)
-              #value1 = turning * 25 + 1250
-
-              #if last_right != value1:
-                #client.send('H' + str(value1) + '\n')
-                #last_right = value1
-                #print 'right:', value1
-          else:
               turning = getValueFromController(event.value, trigger_value, 20)
-              value1 = turning * 25 + 1250
+              value1 = turning
 
               if last_right != value1:
-                #client.send('H' + str(value1) + '\n')
+                client.send('I' + str(value1) + '\n')
+                last_right = value1
+                print 'right:', value1
+          else:
+              turning = getValueFromController(event.value, trigger_value, 20)
+              value1 = turning
+
+              if last_right != value1:
+                client.send('H' + str(value1) + '\n')
                 last_right = value1
                 print 'right:', value1
 
@@ -273,7 +272,7 @@ def main():
           trigger_value = -event.value
           if is_left_button:
               buckets_speed = getValueFromController(last_left_raw, trigger_value, 20, True)
-              value1 = buckets_speed * 25 + 1220
+              value1 = buckets_speed
 
               if last_left != value1:
                   print 'sending F'
@@ -282,20 +281,27 @@ def main():
                   print 'triggers-left:', value1              
           else:
               speed = getValueFromController(last_left_raw, trigger_value, 20, True)
-              value1 = speed * 25 + 1250
+              value1 = speed
               if last_left != value1:
                   client.send('A' + str(value1) + '\n')
                   last_left = value1
                   print 'triggers-left:', value1
         
           turning = getValueFromController(last_right_raw, trigger_value, 20)
-          value1 = speed * 25 + 1250
-          value2 = turning * 25 + 1250
+          value2 = turning
 
-          if last_right != value2:
-              #client.send('H' + str(value2) + '\n')
-              last_right = value2
-              print 'triggers-right:', value2
+          if is_right_button:
+              if last_right != value2:
+                client.send('I' + str(value2) + '\n')
+                last_right = value2
+                print 'triggers-right-act:', value2         
+          else:
+              if last_right != value2:
+                client.send('H' + str(value2) + '\n')
+                last_right = value2
+                print 'triggers-right:', value2
+
+
 
 if __name__ == "__main__":
   main()

@@ -66,16 +66,18 @@ void setup() {
   );
 }
 
+int upkeep = 2;
+
 void loop() {
   // Check if we have gotten
   // a new command. If so,
   // process it.
-  
   functionB();
 
-  sendUpdateData();
+  if (upkeep % 50 == 1) sendUpdateData();
+  upkeep = (upkeep % 50) + 1
 
-  delay(500);
+  delay(10);
 }
 
 void sendUpdateData() {
@@ -153,7 +155,7 @@ void functionB() {
     functionA();
 
     if (readyForNewCommand == true) {
-      doStuff(commandType, arg);
+      doStuff(commandType, arg * 25 + 1225);
       readyForNewCommand = false;
       commandType = 0;
       arg = 0;
@@ -164,7 +166,7 @@ void functionB() {
 void doStuff(char command, int arg) {
   switch (command) {
     case 'A':
-      motion->cDriveWheelsWrite(arg);
+      motion->cDriveWheelsWrite(arg - 20);
       break;
     case 'B':
       motion->cDriveBLWWrite(arg);
@@ -179,16 +181,16 @@ void doStuff(char command, int arg) {
       motion->cDriveFRWWrite(arg);
       break;
     case 'F':
-      motion->cDriveBucketWrite(arg);
+      motion->cDriveBucketWrite(arg - 30);
       break;
     case 'G':
-      motion->cDriveConveyerWrite(arg);
+      motion->cDriveConveyerWrite(arg - 40);
       break;
     case 'H':
-      motion->cMoveSteeringWrite(arg);
+      motion->cMoveSteeringWrite(arg - 30);
       break;
     case 'I':
-      motion->cMoveBucketsWrite(arg);
+      motion->cMoveBucketsWrite(arg - 30);
       break;
     case 'J':
       Serial.print('J');

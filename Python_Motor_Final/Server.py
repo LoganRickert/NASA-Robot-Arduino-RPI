@@ -85,18 +85,22 @@ def get_picture(which_picture):
     return settings.camera.get_image(which_picture)
 
 def update_sensors(print_lock, aSer):
+    upkeep = 2
+
     while True:
         temp = settings.arduino_to_write
         settings.arduino_to_write = []
 
         for item in temp:
+            print 'Sending to Ard:', item
             aSer.write(item + '\n')
             aSer.flushOutput()
 
-        settings.sensor.update(print_lock, aSer.readline())
+        if upkeep % 50 == 0: settings.sensor.update(print_lock, aSer.readline())
+        upkeep = (upkeep % 50) + 1
 
-        # Sleep for 100 milliseconds
-        time.sleep(.5);
+        # Sleep for 10 milliseconds
+        time.sleep(0.010);
 
 def recvall(print_lock, client_socket):
     data = "z"
