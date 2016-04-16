@@ -166,7 +166,7 @@ void functionB() {
 void doStuff(char command, int arg) {
   switch (command) {
     case 'A':
-      motion->cDriveWheelsWrite(arg - 20);
+      motion->cDriveWheelsWrite(arg);
       break;
     case 'B':
       motion->cDriveBLWWrite(arg);
@@ -181,16 +181,16 @@ void doStuff(char command, int arg) {
       motion->cDriveFRWWrite(arg);
       break;
     case 'F':
-      motion->cDriveBucketWrite(arg - 30);
+      motion->cDriveBucketWrite(arg);
       break;
     case 'G':
-      motion->cDriveConveyerWrite(arg - 40);
+      motion->cDriveConveyerWrite(arg);
       break;
     case 'H':
-      motion->cMoveSteeringWrite(arg - 30);
+      motion->cMoveSteeringWrite(arg);
       break;
     case 'I':
-      motion->cMoveBucketsWrite(arg - 30);
+      motion->cMoveBucketsWrite(arg);
       break;
     case 'J':
       Serial.print('J');
