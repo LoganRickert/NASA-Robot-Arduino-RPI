@@ -109,10 +109,10 @@ Motion::Motion(int aPin1,int aPin2, int aPin3, int aPin4, int aPin5, int aPin6, 
 
     // Stop it!!!!!!!!!
     cDriveWheelsWrite(1470);
-    cMoveSteeringWrite(1500);
-    cMoveBucketsWrite(1500);
+    cMoveSteeringWrite(1480);
+    cMoveBucketsWrite(1470);
     cDriveBucketWrite(1480);
-    cDriveConveyerWrite(1500);
+    cDriveConveyerWrite(1480);
 }
   
 // Ron: Function used to destroy the object (destructor)
