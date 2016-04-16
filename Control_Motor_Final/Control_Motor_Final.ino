@@ -27,13 +27,13 @@ int gBucketMotorPin = 42;
 int gConveryerMotorPin = 44;
 
 // Senosr Pins
-int aBackLeftWheelEncoderPin = A0;
-int aBackRightWheelEncoderPin = A0;
-int aFrontLeftWheelEncoderPin = A0;
-int aFrontRightWheelEncoderPin = A0;
-int aSteeringActSensorPin = A0;
+int aBackLeftWheelEncoderPin = A2;
+int aBackRightWheelEncoderPin = A2;
+int aFrontLeftWheelEncoderPin = A2;
+int aFrontRightWheelEncoderPin = A2;
+int aSteeringActSensorPin = A1;
 int aBucketActSensorPin = A0;
-int aIRBackPin = A0;
+int aIRBackPin = A2;
 
 Motion *motion;
 Sensor *sensor;
@@ -75,7 +75,7 @@ void loop() {
   functionB();
 
   if (upkeep % 50 == 1) sendUpdateData();
-  upkeep = (upkeep % 50) + 1
+  upkeep = (upkeep % 50) + 1;
 
   delay(10);
 }
