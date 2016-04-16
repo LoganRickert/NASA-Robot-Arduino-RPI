@@ -32,7 +32,7 @@ def run(print_lock, client_socket):
                 print "Processing:", item
 
             if item[0] == 'A':
-                settings.settings.motion.cAllWheelsWrite(item[1:])
+                settings.motion.cAllWheelsWrite(item[1:])
             if item[0] == 'B':
                 settings.motion.cBackLeftWheelWrite(item[1:])
             if item[0] == 'C':
