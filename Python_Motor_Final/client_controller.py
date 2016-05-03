@@ -165,7 +165,7 @@ def main():
   last_right_raw = 0
 
   client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-  client.connect(('10.1.117.111', 1338))
+  client.connect(('192.168.1.109', 1338))
   client.send('superawesomesecurepassword\n')
 
   print recvall(client)
@@ -208,7 +208,7 @@ def main():
       elif event.type == JOYBUTTONDOWN:
           if event.button == 2:
               # x button
-              client.send('G' + '7' + '\n')
+              client.send('G' + '15' + '\n')
           elif event.button == 4:
               is_left_button = True
           elif event.button == 5:
@@ -216,7 +216,7 @@ def main():
       elif event.type == JOYBUTTONUP:
           if event.button == 2:
               # x button
-              client.send('G' + '5' + '\n')
+              client.send('G' + '10' + '\n')
           elif event.button == 4:
               is_left_button = False
           elif event.button == 5:

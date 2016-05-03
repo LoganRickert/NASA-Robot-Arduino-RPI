@@ -96,7 +96,7 @@ def update_sensors(print_lock, aSer):
             aSer.write(item + '\n')
             aSer.flushOutput()
 
-        if upkeep % 50 == 0: settings.sensor.update(print_lock, aSer.readline())
+        # if upkeep % 50 == 0: settings.sensor.update(print_lock, aSer.readline())
         upkeep = (upkeep % 50) + 1
 
         # Sleep for 10 milliseconds

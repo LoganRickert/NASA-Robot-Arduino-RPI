@@ -35,8 +35,8 @@ def main():
     Server.setupSocket(print_lock, server_addr, server_socket)
 
     rasp_serial = serial.Serial(
-        port='/dev/ttyACM0', # Linux
-        # port='COM7',           # Windows
+        #port='/dev/ttyACM0', # Linux
+        port='COM8',           # Windows
         baudrate=9600,
     )
 
