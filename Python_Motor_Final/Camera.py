@@ -7,7 +7,7 @@ import itertools
 import time
 
 # 3rd pixel..
-x_scale = 3
+x_scale = 4 
 y_scale = 3
 
 
@@ -50,7 +50,9 @@ class Camera:
             # for each camera
             for camera in self.clist:
                 # append camera objects to camera list
-                self.cameras.append(pygame.camera.Camera(camera, self.size))
+                obj = pygame.camera.Camera(camera, self.size)
+                obj.start()
+                self.cameras.append(obj)
                 # append immage and when it was taken
                 self.current_images.append(["", time.time()])
 
@@ -83,7 +85,7 @@ class Camera:
             # return self.current_images[camera_number][0]
 
         # start camera
-        self.cameras[camera_number].start()
+        #self.cameras[camera_number].start()
         
         # makes temp surface 
         tempSurface = pygame.surface.Surface(self.size, 0, self.display)
@@ -91,8 +93,10 @@ class Camera:
         # save camera immage (full color) to temp surfcae 
         tempSurface = self.cameras[camera_number].get_image(tempSurface)
 
+        print "getting Image:", (time.time() - time_start)
+
         # stope camera
-        self.cameras[camera_number].stop()
+        #self.cameras[camera_number].stop()
 
         # iterations it want through
         wentThrough = 0
@@ -159,7 +163,7 @@ class Camera:
         # compresses the pixel array
         self.current_images[camera_number] = [self._compress(pixels), time.time()]
         
-        print "total Took:", (time.time() - time_start)
+        print "========total Took:", (time.time() - time_start)
 
         # dispalys the snap shot to the screen (hardware function)
         self.display.blit(self.snapshot, (0,0))
@@ -169,6 +173,10 @@ class Camera:
 
         # retursn the current compressed image list
         return self.current_images[camera_number][0]
+
+    def cycle_image(self):
+        tempSurface = pygame.surface.Surface(self.size, 0, self.display)
+        self.cameras[0].get_image(tempSurface)
 
     # compresses the array
     def _compress(self, pixels):
@@ -185,7 +193,9 @@ def main():
 
     while True:
         camera.get_image(0)
-        pygame.time.wait(1000)
+        for i in range(0, 30):
+            pygame.time.wait(100/30)
+            camera.cycle_image()
 
 if __name__ == "__main__":
     main()
