@@ -88,8 +88,8 @@ def update_sensors(print_lock, aSer):
     upkeep = 2
 
     while True:
-        with print_lock:
-            print 'Starting new ard cycle'
+        #with print_lock:
+        #    print 'Starting new ard cycle'
         temp = settings.arduino_to_write
         settings.arduino_to_write = []
 
@@ -101,8 +101,8 @@ def update_sensors(print_lock, aSer):
         # if upkeep % 50 == 0: settings.sensor.update(print_lock, aSer.readline())
         upkeep = (upkeep % 50) + 1
 
-        with print_lock:
-            print 'ending ard cycle'
+        #with print_lock:
+        #    print 'ending ard cycle'
 
         # Sleep for 100 milliseconds
         time.sleep(0.100)
