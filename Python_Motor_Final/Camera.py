@@ -108,7 +108,7 @@ class Camera:
         pxarrayA = pygame.PixelArray(tempSurface)#[0::4, 0::3]
 
         # make a pixel of array of what will be the manipulated  pixels
-        pxarrayB = pygame.PixelArray(self.snapshot)#[0::4, 0::3]
+        #pxarrayB = pygame.PixelArray(self.snapshot)#[0::4, 0::3]
 
         # makes a single array from the array of array's that pygame
         # natively returns
@@ -148,11 +148,11 @@ class Camera:
                     pixels.append(color)
 
                     # copys the new color part onto this display
-                    pxarrayB[x, y] = (color * div, color * div, color * div)
+                    #pxarrayB[x, y] = (color * div, color * div, color * div)
 
         # delete
         del pxarrayA
-        del pxarrayB
+        #del pxarrayB
 
     
         print "img_buffering:", (time.time() - time_start)
@@ -166,10 +166,10 @@ class Camera:
         print "========total Took:", (time.time() - time_start)
 
         # dispalys the snap shot to the screen (hardware function)
-        self.display.blit(self.snapshot, (0,0))
+        #self.display.blit(self.snapshot, (0,0))
 
         # flip the image (swtich buffer (old image to new imae))
-        pygame.display.flip()
+        #pygame.display.flip()
 
         # retursn the current compressed image list
         return self.current_images[camera_number][0]
