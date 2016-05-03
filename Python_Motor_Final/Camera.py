@@ -26,7 +26,7 @@ class Camera:
 
         # dispalys screen
         # create a display surface. standard pygame stuff
-        self.display = pygame.display.set_mode(self.size, 0)
+        #self.display = pygame.display.set_mode(self.size, 0)
         
         # list of all cameras --- location of cameras
         # this is the same as what we saw before
@@ -59,7 +59,7 @@ class Camera:
                 # create a surface to capture to.  for performance purposes
                 # bit depth is the same as that of the display surface.
                 # create the surface once, rather than each time we take an image
-                self.snapshot = pygame.surface.Surface(self.size, 0, self.display)
+                #self.snapshot = pygame.surface.Surface(self.size, 0, self.display)
 
     
     # convert color --- magic make it a 8 bit black and white pixel
@@ -88,7 +88,7 @@ class Camera:
         #self.cameras[camera_number].start()
         
         # makes temp surface 
-        tempSurface = pygame.surface.Surface(self.size, 0, self.display)
+        tempSurface = pygame.surface.Surface(self.size, 0)# self.display)
        
         # save camera immage (full color) to temp surfcae 
         tempSurface = self.cameras[camera_number].get_image(tempSurface)
@@ -175,7 +175,7 @@ class Camera:
         return self.current_images[camera_number][0]
 
     def cycle_image(self):
-        tempSurface = pygame.surface.Surface(self.size, 0, self.display)
+        tempSurface = pygame.surface.Surface(self.size, 0)#, self.display)
         for tempcamera in self.cameras:
             tempcamera.get_image(tempSurface)
 
