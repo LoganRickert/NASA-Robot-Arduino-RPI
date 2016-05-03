@@ -88,6 +88,8 @@ def update_sensors(print_lock, aSer):
     upkeep = 2
 
     while True:
+        with print_lock:
+            print 'Starting new ard cycle'
         temp = settings.arduino_to_write
         settings.arduino_to_write = []
 
@@ -99,8 +101,16 @@ def update_sensors(print_lock, aSer):
         # if upkeep % 50 == 0: settings.sensor.update(print_lock, aSer.readline())
         upkeep = (upkeep % 50) + 1
 
-        # Sleep for 10 milliseconds
-        time.sleep(0.010);
+        with print_lock:
+            print 'ending ard cycle'
+
+        # Sleep for 100 milliseconds
+        time.sleep(0.100)
+
+def update_camera():
+    while True:
+        settings.camera.cycle_images()
+        time.sleep(0.03)
 
 def recvall(print_lock, client_socket):
     data = "z"

@@ -81,8 +81,8 @@ class Camera:
             print "CAMERA OUT OF BOUNCE"
             return 0
 
-        # if time.time() - self.current_images[camera_number][1] < 1:
-            # return self.current_images[camera_number][0]
+        if time.time() - self.current_images[camera_number][1] <= 1:
+            return self.current_images[camera_number][0]
 
         # start camera
         #self.cameras[camera_number].start()
@@ -176,7 +176,8 @@ class Camera:
 
     def cycle_image(self):
         tempSurface = pygame.surface.Surface(self.size, 0, self.display)
-        self.cameras[0].get_image(tempSurface)
+        for tempcamera in self.cameras:
+            tempcamera.get_image(tempSurface)
 
     # compresses the array
     def _compress(self, pixels):

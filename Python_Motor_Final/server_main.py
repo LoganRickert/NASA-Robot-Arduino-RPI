@@ -35,8 +35,8 @@ def main():
     Server.setupSocket(print_lock, server_addr, server_socket)
 
     rasp_serial = serial.Serial(
-        #port='/dev/ttyACM0', # Linux
-        port='COM8',           # Windows
+        port='/dev/ttyACM0', # Linux
+        #port='COM8',           # Windows
         baudrate=9600,
     )
 
@@ -48,9 +48,16 @@ def main():
         target=Server.update_sensors,
         args=(print_lock, rasp_serial)
     )
-    
+
     threads.append(update_sensors_thread)
     update_sensors_thread.start()
+
+    update_cameras_thread = Thread(
+        target=Server.update_camera
+    )
+    
+    threads.append(update_cameras_thread)
+    update_cameras_thread.start()
 
     should_continue = True
 
