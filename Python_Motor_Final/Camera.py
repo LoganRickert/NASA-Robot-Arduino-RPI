@@ -174,7 +174,7 @@ class Camera:
         # retursn the current compressed image list
         return self.current_images[camera_number][0]
 
-    def cycle_image(self):
+    def cycle_images(self):
         tempSurface = pygame.surface.Surface(self.size, 0)#, self.display)
         for tempcamera in self.cameras:
             tempcamera.get_image(tempSurface)
@@ -196,7 +196,7 @@ def main():
         camera.get_image(0)
         for i in range(0, 30):
             pygame.time.wait(100/30)
-            camera.cycle_image()
+            camera.cycle_images()
 
 if __name__ == "__main__":
     main()
