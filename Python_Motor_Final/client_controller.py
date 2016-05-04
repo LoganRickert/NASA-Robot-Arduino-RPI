@@ -2,9 +2,57 @@ import pygame
 from pygame.locals import *
 import socket
 import math
+import time
+import bz2
+import binascii
+import ast
+
+from threading import Thread
 
 WIN_WIDTH = 1024
 WIN_HEIGHT = 576
+
+picture = None
+picture_ready = True
+
+def updateImage(data):
+    x_scale = 4
+    y_scale = 4
+
+    current = time.time()
+    image = bz2.decompress(binascii.unhexlify(data))
+    #print "sent:", len(data)
+    #print "comp:", len(binascii.unhexlify(data))
+    #print "pixels:", len(image)
+    image = ast.literal_eval(image)
+
+    snapshot = pygame.surface.Surface((640, 360), 0)
+    pxarrayA = pygame.PixelArray(snapshot)
+
+    lenx = len(pxarrayA)
+    leny = len(pxarrayA[0])
+
+    #print 'lenx:', lenx
+    #print 'leny:', leny
+
+    color_end = []
+
+    for x in range(0, lenx):
+      current_color = []
+      for y in range(0, leny):
+        money_shot = (leny / y_scale) * (x / x_scale) + (y / y_scale)
+        if (money_shot) < len(image):
+          color = image[money_shot]
+          div = 8
+          pxarrayA[x, y] = (color * div, color * div, color * div)
+
+    del pxarrayA
+
+    global picture
+    picture = snapshot
+    global picture_ready
+    picture_ready = True
+    
 
 def getValueFromController(axis_value, trigger, top_range, reverse=False):
     # Get the current value of the joystick. Between 1 (down) and 1 (up)
@@ -69,7 +117,7 @@ def draw_pie(surface, cx, cy, r, start_angle, end_angle, color):
 
 def updateGUI(screen, font, font_small,
   speed, turning, turning_degree, buckets_speed, camera_feed, 
-  lt, rt, bl, br, fl, fr):
+  lt, rt, bl, br, fl, fr, picture):
   
   # How far the circle should be turned.
   speed_mat_pos = [0, 0]
@@ -96,8 +144,8 @@ def updateGUI(screen, font, font_small,
   screen.fill((0, 0, 0))
 
   # Put the image onto the screen
-  imageSurface = pygame.image.load('3_points.png')
-  screen.blit(imageSurface, ((WIN_WIDTH - 640) - 20, 20))
+  #imageSurface = pygame.image.load('3_points.png')
+  #screen.blit(imageSurface, ((WIN_WIDTH - 640) - 20, 20))
 
   # Surfaces for circles
   circleSurfaces = pygame.surface.Surface((WIN_WIDTH, WIN_HEIGHT), pygame.SRCALPHA, 32)
@@ -140,6 +188,9 @@ def updateGUI(screen, font, font_small,
   textpos = text.get_rect(centerx = 459, centery = 481)
   screen.blit(text, textpos)
 
+  if picture != None:
+    screen.blit(picture, (364, 20))
+
   # Display the new image.
   pygame.display.flip()
 
@@ -165,7 +216,7 @@ def main():
   last_right_raw = 0
 
   client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-  client.connect(('192.168.1.109', 1338))
+  client.connect(('10.1.110.99', 1338))
   client.send('superawesomesecurepassword\n')
 
   print recvall(client)
@@ -191,11 +242,28 @@ def main():
   is_left_button = False
   is_right_button = False
 
+  global picture
+  global picture_ready
+  count = 0
+  
   while should_continue:
-    game_clock.tick(60)
+    if count > 7 and picture_ready:
+        print 'Getting image'
+        picture_ready = False
+        client.send('R' + '0' + '\n')
+        data = ''.join(recvall(client))
+        update_image_thread = Thread(
+          target=updateImage,
+          args=(data,)
+        )
+        print 'starting update thread'
+        update_image_thread.start()
+    else:
+        game_clock.tick(60)
+        count += 1
 
     updateGUI(screen, font, font_small, speed, turning, turning_degree, buckets_speed, camera_feed, 
-      lt, rt, bl, br, fl, fr)
+      lt, rt, bl, br, fl, fr, picture)
     
     for event in pygame.event.get():
       print event.type
@@ -300,8 +368,6 @@ def main():
                 client.send('H' + str(value2) + '\n')
                 last_right = value2
                 print 'triggers-right:', value2
-
-
 
 if __name__ == "__main__":
   main()
