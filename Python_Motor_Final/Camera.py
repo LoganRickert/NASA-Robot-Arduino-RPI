@@ -8,7 +8,7 @@ import time
 
 # 3rd pixel..
 x_scale = 4 
-y_scale = 3
+y_scale = 4 
 
 
 class Camera:
