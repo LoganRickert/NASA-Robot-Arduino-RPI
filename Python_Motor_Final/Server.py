@@ -85,27 +85,21 @@ def get_picture(which_picture):
     return settings.camera.get_image(which_picture)
 
 def update_sensors(print_lock, aSer):
-    upkeep = 2
 
     while True:
-        #with print_lock:
-        #    print 'Starting new ard cycle'
+        if (aSer.inWaiting() > 0):
+            print aSer.read()
         temp = settings.arduino_to_write
         settings.arduino_to_write = []
+
+        temp.insert(0, 'z0')
 
         for item in temp:
             print 'Sending to Ard:', item
             aSer.write(item + '\n')
-            aSer.flushOutput()
+            aSer.flushOutput()        
 
-        # if upkeep % 50 == 0: settings.sensor.update(print_lock, aSer.readline())
-        upkeep = (upkeep % 50) + 1
-
-        #with print_lock:
-        #    print 'ending ard cycle'
-
-        # Sleep for 100 milliseconds
-        time.sleep(0.100)
+        time.sleep(0.05)
 
 def update_camera():
     while True:
