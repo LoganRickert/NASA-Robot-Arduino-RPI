@@ -66,7 +66,7 @@ void setup() {
   );
 }
 
-int upkeep = 2;
+lastCheck = 0;
 
 void loop() {
   // Check if we have gotten
@@ -74,9 +74,12 @@ void loop() {
   // process it.
   functionB();
 
-  if (upkeep % 50 == 1) sendUpdateData();
-  upkeep = (upkeep % 50) + 1;
-
+  if (lastCheck > 100) {
+    motion->cDriveWheelsWrite(1450);
+  } else {
+    lastCheck += 1;
+  }
+  
   delay(10);
 }
 
@@ -220,5 +223,7 @@ void doStuff(char command, int arg) {
       Serial.print('P');
       Serial.println(sensor->getIRBack());
       break;
+    case 'Z':
+      sendUpdateData();
   }
 }

@@ -99,7 +99,7 @@ def update_sensors(print_lock, aSer):
             aSer.write(item + '\n')
             aSer.flushOutput()        
 
-        time.sleep(0.05)
+        time.sleep(0.050)
 
 def update_camera():
     while True:
