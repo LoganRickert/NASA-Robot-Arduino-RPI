@@ -59,8 +59,8 @@ def getNewImage():
         time.sleep(0.05)
 
 def updateImage(data):
-    x_scale = 6
-    y_scale = 6
+    x_scale = 4
+    y_scale = 4
 
     current = time.time()
     image = bz2.decompress(binascii.unhexlify(data))
@@ -254,10 +254,14 @@ def main():
     print "Adding joystick", joysticks[-1].get_name()
   
   trigger_value = 0
-  last_left = 0
-  last_right = 0
-  last_left_raw = 0
-  last_right_raw = 0
+  last_lefta = 0
+  last_leftb = 0
+  last_righta = 0
+  last_rightb = 0
+  last_raw_a = 0
+  last_raw_b = 0
+  last_raw_t_a = 0
+  last_raw_t_b = 0
 
   client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   client.connect(('192.168.1.109', 1338))
@@ -303,7 +307,7 @@ def main():
   global whichCamera
   whichCamera = 0
   global totalCams
-  totalCams = 3
+  totalCams = 1
   
   while should_continue:
     game_clock.tick(60)
@@ -312,7 +316,6 @@ def main():
       lt, rt, bl, br, fl, fr)
     
     for event in pygame.event.get():
-      print event.type
       if event.type == QUIT:
         print "Exiting the window..."
         pygame.quit()
@@ -325,16 +328,16 @@ def main():
           if event.button == 2:
               # x button
               client.send('G' + '20' + '\n')
+              pass
           elif event.button == 4:
               is_left_button = True
-          elif event.button == 5:
-              is_right_button = True
           elif event.button == 5:
               is_right_button = True
       elif event.type == JOYBUTTONUP:
           if event.button == 2:
               # x button
               client.send('G' + '10' + '\n')
+              pass
           elif event.button == 4:
               is_left_button = False
           elif event.button == 5:
@@ -350,74 +353,84 @@ def main():
         # 4 = Right stick, up to down, -1 to 1
         # -4 = Right stick, left to right, -1 to 1
         #print event.axis
+
         if event.axis == 1:
-          last_left_raw = event.value
-          if is_left_button:
-              buckets_speed = getValueFromController(last_left_raw, trigger_value, 20, True)
-              value1 = buckets_speed
-              if last_left != value1:
-                  client.send('F' + str(value1) + '\n')
-                  last_left = value1
-                  print 'left_buckets:', value1
-          else:
-              speed = getValueFromController(last_left_raw, trigger_value, 20, True)
-              value1 = speed
-              if last_left != value1:
-                  client.send('A' + str(value1) + '\n')
-                  last_left = value1
-                  print 'left:', value1
+          # Buckets
+          last_raw_a = joysticks[0].get_axis(event.axis)
+          last_raw_b = joysticks[1].get_axis(event.axis)
+
+          buckets_speed = getValueFromController(last_raw_b, trigger_value, 20, True)
+          value1 = buckets_speed
+          if last_lefta != value1:
+              client.send('F' + str(value1) + '\n')
+              last_lefta = value1
+              print 'left_buckets:', value1
+
+          # Front/back wheels
+          speed = getValueFromController(last_raw_a, trigger_value, 20, True)
+          value1 = speed
+          if last_leftb != value1:
+              client.send('A' + str(value1) + '\n')
+              last_leftb = value1
+              print 'left:', value1
 
         if event.axis == 4:
-          last_right_raw = event.value
-          if is_right_button:
-              turning = getValueFromController(event.value, trigger_value, 20)
-              value1 = turning
+          last_raw_t_a = joysticks[0].get_axis(event.axis)
+          last_raw_t_b = joysticks[1].get_axis(event.axis)
 
-              if last_right != value1:
-                client.send('I' + str(value1) + '\n')
-                last_right = value1
-                print 'right:', value1
-          else:
-              turning = getValueFromController(event.value, trigger_value, 20)
-              value1 = turning
+          # Buckets actuator
+          turningb = getValueFromController(last_raw_t_b, trigger_value, 20)
+          valueb = turningb
 
-              if last_right != value1:
-                client.send('H' + str(value1) + '\n')
-                last_right = value1
-                print 'right:', value1
+          if last_rightb != valueb:
+            client.send('I' + str(valueb) + '\n')
+            last_rightb = valueb
+            print 'left controller:', valueb
+
+          # Steering actuator
+          turninga = getValueFromController(last_raw_t_a, trigger_value, 20)
+          valuea = turninga
+
+          if last_righta != valuea:
+            client.send('H' + str(valuea) + '\n')
+            last_righta = valuea
+            print 'right controller:', valuea
 
         if event.axis == 2:
-          trigger_value = -event.value
-          if is_left_button:
-              buckets_speed = getValueFromController(last_left_raw, trigger_value, 20, True)
-              value1 = buckets_speed
+          trigger_value_a = -joysticks[0].get_axis(event.axis)
+          trigger_value_b = -joysticks[1].get_axis(event.axis)
 
-              if last_left != value1:
-                  print 'sending F'
-                  client.send('F' + str(value1) + '\n')
-                  last_left = value1
-                  print 'triggers-left:', value1              
-          else:
-              speed = getValueFromController(last_left_raw, trigger_value, 20, True)
-              value1 = speed
-              if last_left != value1:
-                  client.send('A' + str(value1) + '\n')
-                  last_left = value1
-                  print 'triggers-left:', value1
+          # Adjustment for speed
+          buckets_speed = getValueFromController(last_raw_b, trigger_value_b, 20, True)
+          value1 = buckets_speed
+
+          if last_leftb != value1:
+              print 'sending F'
+              client.send('F' + str(value1) + '\n')
+              last_leftb = value1
+              print 'triggers-left:', value1      
+
+          speed = getValueFromController(last_raw_a, trigger_value_a, 20, True)
+          value1 = speed
+          if last_lefta != value1:
+              client.send('A' + str(value1) + '\n')
+              last_lefta = value1
+              print 'triggers-left:', value1
         
-          turning = getValueFromController(last_right_raw, trigger_value, 20)
+          turning = getValueFromController(last_raw_t_a, trigger_value_a, 20)
           value2 = turning
 
-          if is_right_button:
-              if last_right != value2:
-                client.send('I' + str(value2) + '\n')
-                last_right = value2
-                print 'triggers-right-act:', value2         
-          else:
-              if last_right != value2:
-                client.send('H' + str(value2) + '\n')
-                last_right = value2
-                print 'triggers-right:', value2
+          if last_righta != value2:
+            client.send('H' + str(value2) + '\n')
+            last_righta = value2
+            print 'triggers-right-act:', value2  
+
+          turning = getValueFromController(last_raw_t_b, trigger_value_b, 20)
+          value2 = turning       
+          if last_rightb != value2:
+            client.send('I' + str(value2) + '\n')
+            last_rightb = value2
+            print 'triggers-right:', value2
 
 if __name__ == "__main__":
   main()
