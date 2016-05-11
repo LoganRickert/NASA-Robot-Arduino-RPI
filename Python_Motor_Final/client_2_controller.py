@@ -47,7 +47,7 @@ def getNewImage():
                 #print 'starting update thread'
                 update_image_thread.start()
 
-            whichCamera = (whichCamera + 1) % totalCams;
+            # whichCamera = (whichCamera + 1) % totalCams
             imageClient.send('R' + str(whichCamera) + '\n')
             oldData = data
             data = ''.join(recvall(imageClient))
@@ -334,6 +334,9 @@ def main():
           elif event.button == 5:
               is_right_button = True
       elif event.type == JOYBUTTONUP:
+          if event.button == 0:
+            print 'Changing camera feeds'
+            whichCamera = (whichCamera + 1) % totalCams
           if event.button == 2:
               # x button
               client.send('G' + '10' + '\n')
@@ -374,8 +377,7 @@ def main():
               last_leftb = value1
               print 'left:', value1
 
-        if event.axis == 4:
-          last_raw_t_a = joysticks[0].get_axis(event.axis)
+        if event.axis == 3:
           last_raw_t_b = joysticks[1].get_axis(event.axis)
 
           # Buckets actuator
@@ -386,6 +388,9 @@ def main():
             client.send('I' + str(valueb) + '\n')
             last_rightb = valueb
             print 'left controller:', valueb
+
+        if event.axis == 4:
+          last_raw_t_a = joysticks[0].get_axis(event.axis)
 
           # Steering actuator
           turninga = getValueFromController(last_raw_t_a, trigger_value, 20)
