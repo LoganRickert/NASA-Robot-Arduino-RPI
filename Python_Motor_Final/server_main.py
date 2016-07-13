@@ -40,6 +40,8 @@ def main():
         baudrate=9600,
     )
 
+    time.sleep(3)
+
     settings.init()
 
     threads = []

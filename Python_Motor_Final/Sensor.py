@@ -25,20 +25,30 @@ class Sensor:
 
     def update(self, print_lock, information):
         information = information.split('-')
-        print information
+        #print information
 
         if len(information) == 7:
-            self.cBackLeftWheelEncoder = information[0]
-            self.cBackRightWheelEncoder = information[1]
-            self.cFrontLeftWheelEncoder = information[2]
-            self.cFrontRightWheelEncoder = information[3]
-            self.cSteeringActSensor = information[4]
-            self.cBucketActSensor = information[5]
-            self.cIRBack = information[6].split()[0] # Removes \r\n
+            self.cBackLeftWheelEncoder = int(information[0])
+            self.cBackRightWheelEncoder = int(information[1])
+            self.cFrontLeftWheelEncoder = int(information[2])
+            self.cFrontRightWheelEncoder = int(information[3])
+            self.cSteeringActSensor = int(information[4])
+            self.cBucketActSensor = int(information[5])
+            self.cIRBack = int(information[6].split()[0]) # Removes \r\n
         else:
             with print_lock:
                 print "Something's gone bad with update!"
                 print "Got: ", information
+    
+    def sendUpdate(self):
+        return "" + \
+            str(self.cBackLeftWheelEncoder)   + "-" + \
+            str(self.cBackRightWheelEncoder)  + "-" + \
+            str(self.cFrontLeftWheelEncoder)  + "-" + \
+            str(self.cFrontRightWheelEncoder) + "-" + \
+            str(self.cSteeringActSensor)      + "-" + \
+            str(self.cBucketActSensor)        + "-" + \
+            str(self.cIRBack)
 
     # def writeread(self, serial_lock, aSer, to_write):
     #     value = None

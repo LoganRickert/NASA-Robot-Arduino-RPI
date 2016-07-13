@@ -7,9 +7,8 @@ import itertools
 import time
 
 # 3rd pixel..
-x_scale = 4 
-y_scale = 4 
-
+x_scale = 2 
+y_scale = 2 
 
 class Camera:
 
@@ -17,6 +16,8 @@ class Camera:
     def __init__(self):
         #640 by 360 scree size
         self.size = (640, 360)
+
+        self.processing = False
 
         # initialize pygame
         pygame.init()
@@ -40,6 +41,9 @@ class Camera:
         # define camera array --- images of camera
         self.current_images = []
 
+        self.last_camera = 0
+        self.last_camera_on = False
+
         # if no cameras are connected
         if not self.clist:
             # 0 cameras
@@ -51,7 +55,7 @@ class Camera:
             for camera in self.clist:
                 # append camera objects to camera list
                 obj = pygame.camera.Camera(camera, self.size)
-                obj.start()
+                #obj.start()
                 self.cameras.append(obj)
                 # append immage and when it was taken
                 self.current_images.append(["", time.time()])
@@ -73,6 +77,7 @@ class Camera:
 
     # retunrs the image 
     def get_image(self, camera_number):
+        self.processing = True
         #if self.camera.query_image():
         time_start = time.time()
 
@@ -81,12 +86,19 @@ class Camera:
             print "CAMERA OUT OF BOUNCE"
             return 0
 
-        if time.time() - self.current_images[camera_number][1] <= 1:
+        if time.time() - self.current_images[camera_number][1] <= .25:
             return self.current_images[camera_number][0]
 
         # start camera
-        #self.cameras[camera_number].start()
-        
+        if self.last_camera != camera_number:
+            if self.last_camera_on == True:
+               self.cameras[self.last_camera].stop()
+            self.cameras[camera_number].start()
+            self.last_camera = camera_number
+        elif self.last_camera_on == False:
+            self.cameras[camera_number].start()
+            self.last_camera_on = True
+
         # makes temp surface 
         tempSurface = pygame.surface.Surface(self.size, 0)# self.display)
        
@@ -96,7 +108,10 @@ class Camera:
         print "getting Image:", (time.time() - time_start)
 
         # stope camera
-        #self.cameras[camera_number].stop()
+        self.cameras[camera_number].stop()
+        self.last_camera_on = False
+
+        self.processing = False
 
         # iterations it want through
         wentThrough = 0
@@ -176,8 +191,11 @@ class Camera:
 
     def cycle_images(self):
         tempSurface = pygame.surface.Surface(self.size, 0)#, self.display)
-        for tempcamera in self.cameras:
-            tempcamera.get_image(tempSurface)
+        
+        #print 'testing last camera'
+        if self.processing == False and self.last_camera_on:
+            self.cameras[self.last_camera].get_image(tempSurface)
+            #print 'updating image'
 
     # compresses the array
     def _compress(self, pixels):

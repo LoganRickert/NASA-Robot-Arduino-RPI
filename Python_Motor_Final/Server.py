@@ -81,30 +81,45 @@ def run(print_lock, client_socket):
                 print "sent:", len(to_send)
                 client_socket.send(to_send + '\n')
 
+            if item[0] == 'Z':
+                #print ':::::::', settings.sensor.sendUpdate() 
+                client_socket.send(settings.sensor.sendUpdate() + '\n')
+
 def get_picture(which_picture):
     return settings.camera.get_image(which_picture)
 
 def update_sensors(print_lock, aSer):
 
     while True:
-        if (aSer.inWaiting() > 0):
-            print aSer.read()
+        #print 'NAU'
+
+        while (aSer.inWaiting() > 0):
+            #print 'Ard sent back: ', aSer.readline()
+            #global cake
+            #cake = aSer.readlines()
+            #print 'Ard sent back:', aSer.readline()
+            cake = aSer.readline()
+            #print cake
+            if len(cake) > 10:
+              settings.sensor.update(print_lock, cake)
+
         temp = settings.arduino_to_write
         settings.arduino_to_write = []
 
-        temp.insert(0, 'z0')
+        temp.insert(0, 'Z0')
+        #print 'total:', temp
 
         for item in temp:
-            print 'Sending to Ard:', item
+            #print 'Sending to Ard:', item
             aSer.write(item + '\n')
-            aSer.flushOutput()        
+            #aSer.flushOutput()        
 
-        time.sleep(0.05)
+        time.sleep(0.1)
 
 def update_camera():
     while True:
         settings.camera.cycle_images()
-        time.sleep(0.03)
+        time.sleep(0.15)
 
 def recvall(print_lock, client_socket):
     data = "z"

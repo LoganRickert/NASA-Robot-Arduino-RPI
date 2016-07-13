@@ -27,13 +27,13 @@ int gBucketMotorPin = 42;
 int gConveryerMotorPin = 44;
 
 // Senosr Pins
-int aBackLeftWheelEncoderPin = A2;
-int aBackRightWheelEncoderPin = A2;
-int aFrontLeftWheelEncoderPin = A2;
-int aFrontRightWheelEncoderPin = A2;
-int aSteeringActSensorPin = A1;
+int aBackLeftWheelEncoderPin = A1;
+int aBackRightWheelEncoderPin = A1;
+int aFrontLeftWheelEncoderPin = A1;
+int aFrontRightWheelEncoderPin = A1;
+int aSteeringActSensorPin = A14;
 int aBucketActSensorPin = A0;
-int aIRBackPin = A2;
+int aIRBackPin = A4;
 
 Motion *motion;
 Sensor *sensor;
@@ -66,7 +66,10 @@ void setup() {
   );
 }
 
-int upkeep = 2;
+int lastBucketActCheck = 0;
+int lastSteeringActCheck = 0;
+
+int lastCheck = 0;
 
 void loop() {
   // Check if we have gotten
@@ -74,10 +77,43 @@ void loop() {
   // process it.
   functionB();
 
-  if (upkeep % 50 == 1) sendUpdateData();
-  upkeep = (upkeep % 50) + 1;
-
+  if (lastCheck > 100) {
+    motion->cDriveWheelsWrite(1475);
+  } else {
+    lastCheck += 1;
+  }
+  
+  checkStops();
+  sensor->getSteeringActSensor();
+  sensor->getBucketActSensor();
+  
   delay(10);
+}
+
+void checkStops() {
+  if (sensor->getBucketActSensor() <= 110) {
+    if (lastBucketActCheck == 0) {
+      lastBucketActCheck = 1;
+    } else {
+      if (motion->getBucketActSpeed() <= 1450) {
+        motion->cMoveBucketsWrite(1450);
+      } else {
+        lastBucketActCheck = 0; 
+      }
+    }
+  }
+  
+  if (sensor->getBucketActSensor() >= 190) {
+    if (lastBucketActCheck == 0) {
+      lastBucketActCheck = 1;
+    } else {
+      if (motion->getBucketActSpeed() >= 1450) {
+        motion->cMoveBucketsWrite(1450);
+      } else {
+        lastBucketActCheck = 0; 
+      }
+    }
+  }
 }
 
 void sendUpdateData() {
@@ -132,9 +168,6 @@ void functionA() {
         // end of the current command.
         if (character == '\n') {
           readyForNewCommand = true;
-          Serial.print(commandType);
-          Serial.print('-');
-          Serial.println(arg);
         } else {
           // Shift arg by 1 to make room
           // for the new number.
@@ -155,7 +188,7 @@ void functionB() {
     functionA();
 
     if (readyForNewCommand == true) {
-      doStuff(commandType, arg * 25 + 1225);
+      doStuff(commandType, arg * 25 + 1215);
       readyForNewCommand = false;
       commandType = 0;
       arg = 0;
@@ -220,5 +253,8 @@ void doStuff(char command, int arg) {
       Serial.print('P');
       Serial.println(sensor->getIRBack());
       break;
+    case 'Z':
+      lastCheck = 0;
+      sendUpdateData();
   }
 }

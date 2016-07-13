@@ -25,12 +25,27 @@ int Sensor::getFrontRightWheelEncoder() {
 
 // Ron: Function used to get the stearing angle
 int Sensor::getSteeringActSensor() {
-    return analogRead(cSteeringActSensor);
+    int tempa = analogRead(cSteeringActSensor) / 5;
+    int temp = tempa - cSteeringActSensorLast;
+    if (temp < 0) temp *= -1;
+    if (temp > 5) return cSteeringActSensorLast;
+    else {
+      cSteeringActSensorLast = tempa;
+      return tempa; 
+    }
 }
 
 // Ron: Function used to get the bucket system angle
 int Sensor::getBucketActSensor() {
-    return analogRead(cBucketActSensor);
+    int tempa = analogRead(cBucketActSensor) / 5;
+    int temp = tempa - cBucketActSensorLast;
+    
+    if (temp < 0) temp *= -1;
+    if (temp > 5) return cBucketActSensorLast;
+    else {
+      cBucketActSensorLast = tempa;
+      return tempa; 
+    }
 }
 
 // Ron: Function used to get the robot distance from object in back
@@ -47,6 +62,21 @@ Sensor::Sensor(int aPin1,int aPin2, int aPin3, int aPin4, int aPin5, int aPin6, 
     cSteeringActSensor = aPin5;
     cBucketActSensor = aPin6;
     cIRBack = aPin7;
+    
+    int avga = 0;
+    int avgb = 0;
+    int totala = 0;
+    int totalb = 0;
+    delay(100);
+    for (int i = 0; i < 50; i++) {totala += 1; int num = analogRead(cBucketActSensor) / 5; Serial.println(num); avga += num; delay(10); }
+    for (int i = 0; i < 50; i++) {totalb += 1; avgb += analogRead(cSteeringActSensor) / 5; delay(10);}
+    delay(10);
+    cSteeringActSensorLast = avgb / totala;
+    delay(10);
+    cBucketActSensorLast = avga / totalb;
+    
+    Serial.println(cSteeringActSensorLast);
+    Serial.println(cBucketActSensorLast);
 }
 
 // Ron: Function used to destroy the object (destructor)

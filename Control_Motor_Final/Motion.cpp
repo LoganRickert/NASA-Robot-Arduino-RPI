@@ -108,10 +108,10 @@ Motion::Motion(int aPin1,int aPin2, int aPin3, int aPin4, int aPin5, int aPin6, 
     cConveryerMotor.attach(aPin8);
 
     // Stop it!!!!!!!!!
-    cDriveWheelsWrite(1470);
+    cDriveWheelsWrite(1480);
     cMoveSteeringWrite(1480);
     cMoveBucketsWrite(1470);
-    cDriveBucketWrite(1480);
+    cDriveBucketWrite(1470);
     cDriveConveyerWrite(1480);
 }
   

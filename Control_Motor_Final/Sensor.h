@@ -41,6 +41,9 @@ class Sensor {
         int cSteeringActSensor;
         int cBucketActSensor;
         int cIRBack;
+        
+        int cSteeringActSensorLast;
+        int cBucketActSensorLast;
 };
 
 #endif
